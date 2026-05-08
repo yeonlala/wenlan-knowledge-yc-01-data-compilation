@@ -13,8 +13,8 @@
     extracted_markdown/   # 每个 document 一份 .md（整篇正文）
 
 用法：
-  python prepare_local_kb_document_centric.py
-  python prepare_local_kb_document_centric.py --extract-root extract_jsons
+  python 3_prepare_local_kb.py
+  python 3_prepare_local_kb.py --extract-root extract_jsons
 
 依赖：
   pip install python-docx pypdf pdfplumber
@@ -708,7 +708,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--extract-root",
         default="extract_jsons",
-        help="extract_confirmation_checklists 输出根目录，默认 extract_jsons",
+        help="2_export_confirmation_bundle 输出根目录，默认 extract_jsons",
     )
     args = parser.parse_args(argv)
 

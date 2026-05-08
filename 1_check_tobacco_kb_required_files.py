@@ -1995,7 +1995,7 @@ def main() -> None:
         if len(sys.argv) < 2:
             print("请在含有「第一批」文件夹的目录下执行本脚本，或显式传入路径，例如：")
             print(
-                r'python check_tobacco_kb_required_files.py "D:\资料上报\第一批"'
+                r'python 1_check_tobacco_kb_required_files.py "D:\资料上报\第一批"'
             )
         sys.exit(1)
 

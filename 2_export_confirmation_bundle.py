@@ -20,14 +20,14 @@
 也可用 --folder-name 覆盖（自动去掉误写的【】）。
 
 用法：
-  python extract_confirmation_checklists.py \\
+  python 2_export_confirmation_bundle.py \\
     "第一批/福州市局_民主管理网升级改造_2025_已验收/01_管理确认/项目资料上报确认单_20260508.json"
 
-  python extract_confirmation_checklists.py --folder-name "福州市局_民主管理网升级改造_2025_已验收" \\
+  python 2_export_confirmation_bundle.py --folder-name "福州市局_民主管理网升级改造_2025_已验收" \\
     "path/to/确认单.json"
 
   # 省略路径时默认：自动扫描仓库下「第一批」各项目的 01_管理确认 内确认单 .json
-  python extract_confirmation_checklists.py
+  python 2_export_confirmation_bundle.py
 """
 
 from __future__ import annotations

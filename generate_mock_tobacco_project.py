@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import random
 import shutil
 import sys
@@ -22,14 +23,21 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
-from check_tobacco_kb_required_files import (
-    CORE_MATERIALS_DIR,
-    PROJECT_FOLDER_NAME_SPEC,
-    PROJECT_TOP_LEVEL_DIRS,
-    STANDARD_DIRS,
-    check_project_folder_name,
-    normalize_name,
+_REPO_ROOT = Path(__file__).resolve().parent
+_spec = importlib.util.spec_from_file_location(
+    "check_tobacco_kb_required_files",
+    _REPO_ROOT / "1_check_tobacco_kb_required_files.py",
 )
+assert _spec is not None and _spec.loader is not None
+_check_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_check_mod)
+
+CORE_MATERIALS_DIR = _check_mod.CORE_MATERIALS_DIR
+PROJECT_FOLDER_NAME_SPEC = _check_mod.PROJECT_FOLDER_NAME_SPEC
+PROJECT_TOP_LEVEL_DIRS = _check_mod.PROJECT_TOP_LEVEL_DIRS
+STANDARD_DIRS = _check_mod.STANDARD_DIRS
+check_project_folder_name = _check_mod.check_project_folder_name
+normalize_name = _check_mod.normalize_name
 from tobacco_kb.naming_convention import (
     VALID_EXTENSIONS,
     build_standard_filename_stem,
@@ -534,7 +542,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     if args.project_name is None:
         print("（本轮使用自动目录名；「第一批」内可同时保留多套示例以便对比）")
-    print("可用：python check_tobacco_kb_required_files.py")
+    print("可用：python 1_check_tobacco_kb_required_files.py")
     return 0
 
 

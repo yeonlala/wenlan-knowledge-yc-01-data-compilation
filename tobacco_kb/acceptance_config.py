@@ -5,7 +5,7 @@
 ================================================================================
 
 **只需编辑本文件**，即可同时影响：
-  • `check_tobacco_kb_required_files.py`（自动验收 Excel）
+  • `1_check_tobacco_kb_required_files.py`（自动验收 Excel）
   • `generate_mock_tobacco_project.py`（模拟资料生成）
 
 以下可调：

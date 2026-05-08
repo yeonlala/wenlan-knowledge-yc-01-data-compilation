@@ -2,7 +2,7 @@
   "schema_version": "2.4",
   "purpose_zh": "本地知识库沉淀准备：一个原始文件对应一个 document；extracted_markdown 为整篇 Markdown（含表格）；仅 manifest 无 tables/rows 字段",
   "project_folder": "福州市局_民主管理网升级改造_2025_已验收",
-  "generated_at": "2026-05-08T06:50:18Z",
+  "generated_at": "2026-05-08T06:58:57Z",
   "source_dir": "docs_metadata",
   "project_fields": {
     "branch_name": "福建省烟草公司福州市公司111111",
