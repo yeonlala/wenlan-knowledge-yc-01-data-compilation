@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>资料包自动验收报告</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--bd:#e2e8f0;--txt:#0f172a;--muted:#64748b;--ok:#16a34a;--warn:#ca8a04;--bad:#dc2626;--bar-bg:#e2e8f0;}
+*{box-sizing:border-box;}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Microsoft YaHei',sans-serif;margin:0;background:var(--bg);color:var(--txt);line-height:1.55;}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 48px;}
+header{background:linear-gradient(135deg,#1e3a5f,#0f172a);color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:20px;}
+header h1{margin:0 0 8px;font-size:1.35rem;font-weight:700;}
+.meta{color:#cbd5e1;font-size:0.9rem;}
+h2{font-size:1.1rem;margin:24px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--bd);}
+table{border-collapse:collapse;width:100%;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.06);}
+th,td{border:1px solid var(--bd);padding:8px 10px;font-size:0.875rem;vertical-align:top;}
+thead th{background:#f1f5f9;text-align:left;}
+tbody tr:nth-child(even){background:#fafbfc;}
+.num{text-align:right;white-space:nowrap;}
+.name{font-weight:600;}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.lvl-a{color:var(--ok);font-weight:600;}
+.lvl-b{color:var(--warn);font-weight:600;}
+.lvl-c,.lvl-d{color:var(--bad);font-weight:600;}
+.lvl-unknown{color:var(--muted);}
+.bar{height:8px;background:var(--bar-bg);border-radius:999px;overflow:hidden;margin-top:4px;}
+.bar>span{display:block;height:100%;background:#3b82f6;border-radius:999px;}
+nav.toc{background:var(--card);padding:12px 14px;border-radius:10px;border:1px solid var(--bd);margin-bottom:20px;font-size:0.9rem;}
+nav.toc a{color:#2563eb;margin-right:12px;text-decoration:none;}
+nav.toc a:hover{text-decoration:underline;}
+.project-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px 18px;margin-bottom:18px;box-shadow:0 1px 3px rgba(15,23,42,.06);}
+.project-card h3{margin:0 0 10px;font-size:1.05rem;}
+.path{color:var(--muted);font-size:0.82rem;word-break:break-all;margin-bottom:12px;}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px;}
+.metric{background:#f8fafc;border:1px solid var(--bd);border-radius:8px;padding:8px 10px;}
+.metric .k{font-size:0.75rem;color:var(--muted);}
+.metric .hint{font-size:0.72rem;color:var(--muted);font-weight:400;margin-top:4px;line-height:1.4;}
+.metric .v{font-size:0.95rem;font-weight:600;margin-top:6px;}
+.req-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:10px 0;}
+.req{display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:8px;padding:8px 10px;background:#fafbfc;font-size:0.82rem;}
+.req .rid{color:var(--muted);font-size:0.72rem;margin-bottom:4px;}
+.req.ok{border-left:4px solid var(--ok);}
+.req.miss{border-left:4px solid var(--bad);}
+.req.opt-miss{border-left:4px solid #94a3b8;background:#f8fafc;}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:0.75rem;font-weight:600;margin-top:6px;}
+.tag-ok{background:#dcfce7;color:#166534;}
+.tag-miss{background:#fee2e2;color:#991b1b;}
+.tag-opt{background:#e2e8f0;color:#475569;}
+.chk-ok{color:var(--ok);font-weight:600;}
+.chk-warn{color:var(--warn);font-weight:600;}
+.chk-bad{color:var(--bad);font-weight:600;}
+details{margin:10px 0;border:1px solid var(--bd);border-radius:8px;padding:8px 12px;background:#fff;}
+summary{cursor:pointer;font-weight:600;font-size:0.9rem;}
+ul.rect{margin:8px 0 0 18px;padding:0;}
+ul.rect li{margin:6px 0;font-size:0.85rem;}
+details.rectify-summary{margin:12px 0;border:2px solid #dc2626;border-radius:8px;padding:10px 12px;background:#fff1f2;box-shadow:0 1px 4px rgba(220,38,38,.18);}
+details.rectify-summary>summary{cursor:pointer;color:#b91c1c;font-weight:800;font-size:0.98rem;letter-spacing:0.03em;}
+details.rectify-summary ul.rect{margin-top:10px;}
+details.rectify-summary ul.rect li{color:#7f1d1d;}
+.closure-banner{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:0.85rem;line-height:1.65;}
+.closure-banner strong{color:#1e3a5f;}
+.closure-h{font-size:0.95rem;margin:0 0 10px;color:#1e3a5f;}
+.closure-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:8px;}
+.cl-cell{border:1px solid var(--bd);border-radius:8px;padding:10px 12px;font-size:0.82rem;background:#fafbfc;}
+.cl-cell .dn{font-weight:600;margin-bottom:6px;color:#475569;font-size:0.76rem;}
+.cl-cell .st{font-weight:700;margin-bottom:6px;font-size:0.88rem;}
+.cl-cell .no{color:var(--muted);font-size:0.76rem;line-height:1.45;}
+.st-ok .st{color:var(--ok);}
+.st-warn .st{color:var(--warn);}
+.st-bad .st{color:var(--bad);}
+footer{margin-top:28px;color:var(--muted);font-size:0.8rem;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>资料包自动验收报告</h1><div class="meta">生成时间：2026-05-08 13:10:41 · 共 2 个项目资料包</div></header>
+<section class="closure-banner">
+<strong>六维闭环（业务目标）</strong>：有资料 · 资料归属清楚 · 命名清楚 · 目录清楚 · 能追责 · 能查找。脚本依据文件名关键词、标准目录、命名规则、风险提示等给出「达标 / 待加强 / 需整改」；台账签字等须人工协同。详见 Excel「六维闭环」表及各项目下卡片。
+</section>
+<h2>总览</h2>
+<div class="scroll-x"><table><thead><tr><th>#</th><th>项目名称</th><th>项目路径</th><th>命名合格率</th><th>合计必交完整率（核心+分区）</th><th>验收建议（A～D 档）</th></tr></thead><tbody>
+<tr><td class="num">1</td><td class="name">测试市局_演示_2026_待验收</td><td>测试市局_演示_2026_待验收</td><td><div>100.0</div><div class="bar"><span style="width:100.0%"></span></div></td><td><div>100.0</div><div class="bar"><span style="width:100.0%"></span></div></td><td class="lvl-a">A-建议入库</td></tr>
+<tr><td class="num">2</td><td class="name">福州市局_民主管理网升级改造_2025_已验收</td><td>福州市局_民主管理网升级改造_2025_已验收</td><td><div>100.0</div><div class="bar"><span style="width:100.0%"></span></div></td><td><div>85.71</div><div class="bar"><span style="width:85.71%"></span></div></td><td class="lvl-b">B-小修后入库</td></tr>
+</tbody></table></div>
+<nav class="toc"><strong>快速跳转：</strong><a href="#p1">测试市局_演示_2026_待验收</a><a href="#p2">福州市局_民主管理网升级改造_2025_已验收</a></nav>
+<h2>各项目详情</h2>
+<section class="project-card" id="p1">
+<h3>测试市局_演示_2026_待验收</h3>
+<div class="path">测试市局_演示_2026_待验收</div>
+<p class="closure-h">六维闭环检视</p>
+<div class="closure-grid">
+<div class="cl-cell st-ok">
+<div class="dn">有资料</div>
+<div class="st">达标</div>
+<div class="no">核心资料必交（约定目录或关键词）与分区资料均已满足（仅核文件名与目录）</div>
+</div>
+<div class="cl-cell st-ok">
+<div class="dn">资料归属清楚</div>
+<div class="st">达标</div>
+<div class="no">项目根目录含客户/项目/年份/状态；多数文件可按规范文件名（含三段式）识别归属</div>
+</div>
+<div class="cl-cell st-ok">
+<div class="dn">命名清楚</div>
+<div class="st">达标</div>
+<div class="no">命名合格率高，无「不合格」档文件</div>
+</div>
+<div class="cl-cell st-ok">
+<div class="dn">目录清楚</div>
+<div class="st">达标</div>
+<div class="no">根下 01+02 齐，「02_核心资料」下标准子目录齐，无多余文件夹</div>
+</div>
+<div class="cl-cell st-ok">
+<div class="dn">能追责</div>
+<div class="st">达标</div>
+<div class="no">根目录与文件名可追溯客户/项目/版本/日期/密级；未触发敏感风险提示</div>
+</div>
+<div class="cl-cell st-ok">
+<div class="dn">能查找</div>
+<div class="st">达标</div>
+<div class="no">分层目录 + 规范命名 + 必交齐全，便于按路径与关键词检索</div>
+</div>
+</div>
+<div class="metrics">
+<div class="metric"><div class="k">命名合格率</div><div class="v">100.0</div></div>
+<div class="metric"><div class="k">核心资料必交完整率</div><div class="v">100.0</div></div>
+<div class="metric"><div class="k">分区资料完整率（01）</div><div class="v">100.0</div></div>
+<div class="metric"><div class="k">合计必交完整率</div><div class="v">100.0</div></div>
+<div class="metric">
+<div class="k">验收建议（A～D 档）</div>
+<div class="hint">综合命名合格率、核心+分区必交完整率、合计缺失条数、风险提示文件数等，按 acceptance_config 阈值自动分档</div>
+<div class="v lvl-a">A-建议入库</div>
+</div>
+<div class="metric">
+<div class="k">项目文件夹命名是否合格</div>
+<div class="hint">须为「客户单位_项目名称_年份_项目状态」；至少 4 段下划线、倒数第二段四位年份</div>
+<div class="v">是</div>
+</div>
+</div>
+<p style="margin:12px 0 6px;font-weight:600;color:#1e3a5f;">核心资料必交（约定标准目录内有文件，或文件名关键词）</p>
+<div class="req-grid">
+<div class="req ok">
+<div class="rid">r01 · 1.项目基本信息表</div>
+<div>1.项目基本信息表</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\测试市局_演示_2026_待验收\02_核心资料\01_项目总览\项目基本信息表_20260101_内部.pdf</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：台账；约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req ok">
+<div class="rid">r02 · 2.建设方案/投标方案/汇报方案（三选一）</div>
+<div>2.建设方案/投标方案/汇报方案（三选一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\测试市局_演示_2026_待验收\02_核心资料\02_售前方案\建设方案_20260101_内部.pdf</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：投标方案建议脱敏；约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req ok">
+<div class="rid">r03 · 3.需求规格说明书/功能清单（二选一）</div>
+<div>3.需求规格说明书/功能清单（二选一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\测试市局_演示_2026_待验收\02_核心资料\03_业务需求\需求规格说明书_20260101_内部.pdf</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req ok">
+<div class="rid">r04 · 4.业务流程图</div>
+<div>4.业务流程图</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\测试市局_演示_2026_待验收\02_核心资料\04_产品设计\业务流程图_20260101_内部.pdf</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req ok">
+<div class="rid">r05 · 5.用户手册/操作手册/培训资料（三选一）</div>
+<div>5.用户手册/操作手册/培训资料（三选一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\测试市局_演示_2026_待验收\02_核心资料\05_实施上线\培训资料_20260101_内部.pdf</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：mock 示例文件名优先含「培训资料」；约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req ok">
+<div class="rid">r06 · 6.验收报告/最终交付清单（二选一）</div>
+<div>6.验收报告/最终交付清单（二选一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\测试市局_演示_2026_待验收\02_核心资料\06_验收交付\验收报告_20260101_内部.pdf</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：已验收项目须具备其一；约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req ok">
+<div class="rid">r07 · 7.项目知识沉淀表/项目复盘表（二选一）</div>
+<div>7.项目知识沉淀表/项目复盘表（二选一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\测试市局_演示_2026_待验收\02_核心资料\07_项目复盘\项目知识沉淀表_20260101_内部.pdf</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：约定目录内已有文件，按文件夹认定</div>
+</div>
+</div>
+<p style="margin:16px 0 6px;font-weight:600;color:#1e3a5f;">分区资料（「01_管理确认」内仅 .md/.json + 文件名关键词；03 不验）</p>
+<div class="req-grid">
+<div class="req ok">
+<div class="rid">t01 · 01_管理确认</div>
+<div>项目资料上报确认单（文件名须含其一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\测试市局_演示_2026_待验收\01_管理确认\项目资料上报确认单_20260508.json; E:\py-project\sinaaaa\yc-checking\第一批\测试市局_演示_2026_待验收\01_管理确认\项目资料上报确认单_20260508.md</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：须放置《项目资料上报确认单》导出的 .md 与 .json；文件名须含关键词之一</div>
+</div>
+</div>
+<details open>
+<summary>目录检查（缺失 / 额外）</summary>
+<p><strong>第一阶段标准目录缺失：</strong>无</p>
+<p><strong>根目录下额外目录：</strong>无</p>
+</details>
+<details open class="rectify-summary">
+<summary>整改清单（摘要）</summary>
+<ul class="rect">
+<li>当前无自动生成的整改项。</li>
+</ul>
+</details>
+<details open>
+<summary>文件命名检查（9 条）</summary>
+<div class="scroll-x"><table><thead><tr><th>文件路径</th><th>文件名</th><th>检查结果</th><th>问题说明</th></tr></thead><tbody>
+<tr><td>01_管理确认\项目资料上报确认单_20260508.json</td><td>项目资料上报确认单_20260508.json</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>01_管理确认\项目资料上报确认单_20260508.md</td><td>项目资料上报确认单_20260508.md</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\01_项目总览\项目基本信息表_20260101_内部.pdf</td><td>项目基本信息表_20260101_内部.pdf</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\02_售前方案\建设方案_20260101_内部.pdf</td><td>建设方案_20260101_内部.pdf</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\03_业务需求\需求规格说明书_20260101_内部.pdf</td><td>需求规格说明书_20260101_内部.pdf</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\04_产品设计\业务流程图_20260101_内部.pdf</td><td>业务流程图_20260101_内部.pdf</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\05_实施上线\培训资料_20260101_内部.pdf</td><td>培训资料_20260101_内部.pdf</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\06_验收交付\验收报告_20260101_内部.pdf</td><td>验收报告_20260101_内部.pdf</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\07_项目复盘\项目知识沉淀表_20260101_内部.pdf</td><td>项目知识沉淀表_20260101_内部.pdf</td><td class="chk-ok">合格</td><td></td></tr>
+</tbody></table></div>
+</details>
+</section>
+<section class="project-card" id="p2">
+<h3>福州市局_民主管理网升级改造_2025_已验收</h3>
+<div class="path">福州市局_民主管理网升级改造_2025_已验收</div>
+<p class="closure-h">六维闭环检视</p>
+<div class="closure-grid">
+<div class="cl-cell st-bad">
+<div class="dn">有资料</div>
+<div class="st">需整改</div>
+<div class="no">有 1 项（核心必交或分区资料）未命中，需补件或调整文件名</div>
+</div>
+<div class="cl-cell st-ok">
+<div class="dn">资料归属清楚</div>
+<div class="st">达标</div>
+<div class="no">项目根目录含客户/项目/年份/状态；多数文件可按规范文件名（含三段式）识别归属</div>
+</div>
+<div class="cl-cell st-ok">
+<div class="dn">命名清楚</div>
+<div class="st">达标</div>
+<div class="no">命名合格率高，无「不合格」档文件</div>
+</div>
+<div class="cl-cell st-ok">
+<div class="dn">目录清楚</div>
+<div class="st">达标</div>
+<div class="no">根下 01+02 齐，「02_核心资料」下标准子目录齐，无多余文件夹</div>
+</div>
+<div class="cl-cell st-ok">
+<div class="dn">能追责</div>
+<div class="st">达标</div>
+<div class="no">根目录与文件名可追溯客户/项目/版本/日期/密级；未触发敏感风险提示</div>
+</div>
+<div class="cl-cell st-bad">
+<div class="dn">能查找</div>
+<div class="st">需整改</div>
+<div class="no">缺材料或缺标准目录时，检索入口不完整</div>
+</div>
+</div>
+<div class="metrics">
+<div class="metric"><div class="k">命名合格率</div><div class="v">100.0</div></div>
+<div class="metric"><div class="k">核心资料必交完整率</div><div class="v">83.33</div></div>
+<div class="metric"><div class="k">分区资料完整率（01）</div><div class="v">100.0</div></div>
+<div class="metric"><div class="k">合计必交完整率</div><div class="v">85.71</div></div>
+<div class="metric">
+<div class="k">验收建议（A～D 档）</div>
+<div class="hint">综合命名合格率、核心+分区必交完整率、合计缺失条数、风险提示文件数等，按 acceptance_config 阈值自动分档</div>
+<div class="v lvl-b">B-小修后入库</div>
+</div>
+<div class="metric">
+<div class="k">项目文件夹命名是否合格</div>
+<div class="hint">须为「客户单位_项目名称_年份_项目状态」；至少 4 段下划线、倒数第二段四位年份</div>
+<div class="v">是</div>
+</div>
+</div>
+<p style="margin:12px 0 6px;font-weight:600;color:#1e3a5f;">核心资料必交（约定标准目录内有文件，或文件名关键词）</p>
+<div class="req-grid">
+<div class="req ok">
+<div class="rid">r01 · 1.项目基本信息表</div>
+<div>1.项目基本信息表</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\01_项目总览\项目合同_20250404_敏感.docx</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：台账；约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req ok">
+<div class="rid">r02 · 2.建设方案/投标方案/汇报方案（三选一）</div>
+<div>2.建设方案/投标方案/汇报方案（三选一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\02_售前方案\建设计划书_20250402_内部.doc</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：投标方案建议脱敏；约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req ok">
+<div class="rid">r03 · 3.需求规格说明书/功能清单（二选一）</div>
+<div>3.需求规格说明书/功能清单（二选一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\03_业务需求\需求规格说明书_20250402_内部.docx</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req miss">
+<div class="rid">r04 · 4.业务流程图</div>
+<div>4.业务流程图</div>
+<span class="tag tag-miss">缺</span>
+</div>
+<div class="req ok">
+<div class="rid">r05 · 5.用户手册/操作手册/培训资料（三选一）</div>
+<div>5.用户手册/操作手册/培训资料（三选一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\05_实施上线\使用操作培训记录_20250506_内部.docx; E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\05_实施上线\实施报告_20250506_内部.doc; E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\05_实施上线\技术报告_20250506_内部.docx; E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\05_实施上线\概要设计报告_20250402_内部.docx; E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\05_实施上线\详细设计报告_20250402_内部.docx</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：mock 示例文件名优先含「培训资料」；约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req ok">
+<div class="rid">r06 · 6.验收报告/最终交付清单（二选一）</div>
+<div>6.验收报告/最终交付清单（二选一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\06_验收交付\测试报告_20250430_公开.docx; E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\06_验收交付\用户使用报告_20250430_公开.docx; E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\06_验收交付\系统功能检查表_20250430_公开.docx; E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\06_验收交付\系统评价表_20250430_公开.docx; E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\02_核心资料\06_验收交付\试运行报告_20250430_公开.docx</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：已验收项目须具备其一；约定目录内已有文件，按文件夹认定</div>
+</div>
+<div class="req opt-miss">
+<div class="rid">r07 · 7.项目知识沉淀表/项目复盘表（二选一）</div>
+<div>7.项目知识沉淀表/项目复盘表（二选一）</div>
+<span class="tag tag-opt">可选缺</span>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：旧项目可无</div>
+</div>
+</div>
+<p style="margin:16px 0 6px;font-weight:600;color:#1e3a5f;">分区资料（「01_管理确认」内仅 .md/.json + 文件名关键词；03 不验）</p>
+<div class="req-grid">
+<div class="req ok">
+<div class="rid">t01 · 01_管理确认</div>
+<div>项目资料上报确认单（文件名须含其一）</div>
+<span class="tag tag-ok">有</span>
+<div style="margin-top:8px;color:var(--muted);font-size:0.78rem;">命中：E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\01_管理确认\项目资料上报确认单_20260508.json; E:\py-project\sinaaaa\yc-checking\第一批\福州市局_民主管理网升级改造_2025_已验收\01_管理确认\项目资料上报确认单_20260508.md</div>
+<div style="margin-top:6px;color:var(--muted);font-size:0.78rem;">备注：须放置《项目资料上报确认单》导出的 .md 与 .json；文件名须含关键词之一</div>
+</div>
+</div>
+<details open>
+<summary>目录检查（缺失 / 额外）</summary>
+<p><strong>第一阶段标准目录缺失：</strong>无</p>
+<p><strong>根目录下额外目录：</strong>无</p>
+</details>
+<details open class="rectify-summary">
+<summary>整改清单（摘要）</summary>
+<ul class="rect">
+<li><strong>必交资料缺失：</strong>缺少：4.业务流程图 — 在对应标准目录内放资料，或文件名含规则关键词；如确无，备注说明</li>
+</ul>
+</details>
+<details open>
+<summary>文件命名检查（16 条）</summary>
+<div class="scroll-x"><table><thead><tr><th>文件路径</th><th>文件名</th><th>检查结果</th><th>问题说明</th></tr></thead><tbody>
+<tr><td>项目验收报告长图_20260508_091439.png</td><td>项目验收报告长图_20260508_091439.png</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>01_管理确认\项目资料上报确认单_20260508.json</td><td>项目资料上报确认单_20260508.json</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>01_管理确认\项目资料上报确认单_20260508.md</td><td>项目资料上报确认单_20260508.md</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\01_项目总览\项目合同_20250404_敏感.docx</td><td>项目合同_20250404_敏感.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\02_售前方案\建设计划书_20250402_内部.doc</td><td>建设计划书_20250402_内部.doc</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\03_业务需求\需求规格说明书_20250402_内部.docx</td><td>需求规格说明书_20250402_内部.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\05_实施上线\使用操作培训记录_20250506_内部.docx</td><td>使用操作培训记录_20250506_内部.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\05_实施上线\实施报告_20250506_内部.doc</td><td>实施报告_20250506_内部.doc</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\05_实施上线\技术报告_20250506_内部.docx</td><td>技术报告_20250506_内部.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\05_实施上线\概要设计报告_20250402_内部.docx</td><td>概要设计报告_20250402_内部.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\05_实施上线\详细设计报告_20250402_内部.docx</td><td>详细设计报告_20250402_内部.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\06_验收交付\测试报告_20250430_公开.docx</td><td>测试报告_20250430_公开.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\06_验收交付\用户使用报告_20250430_公开.docx</td><td>用户使用报告_20250430_公开.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\06_验收交付\系统功能检查表_20250430_公开.docx</td><td>系统功能检查表_20250430_公开.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\06_验收交付\系统评价表_20250430_公开.docx</td><td>系统评价表_20250430_公开.docx</td><td class="chk-ok">合格</td><td></td></tr>
+<tr><td>02_核心资料\06_验收交付\试运行报告_20250430_公开.docx</td><td>试运行报告_20250430_公开.docx</td><td class="chk-ok">合格</td><td></td></tr>
+</tbody></table></div>
+</details>
+</section>
+<footer>本页由验收脚本自动生成 · 2026-05-08 13:10:41 · 数据与同目录 Excel 一致（含「六维闭环」工作表）</footer>
+</div>
+</body>
+</html>

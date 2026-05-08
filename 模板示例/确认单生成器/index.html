@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>项目资料上报确认单生成器</title>
+  <style>
+    :root {
+      --bg: #eef2f7;
+      --card: #fff;
+      --text: #1a2332;
+      --muted: #5c6b7a;
+      --border: #d8e0eb;
+      --accent: #1e4a7a;
+      --accent2: #2563eb;
+      --accent-soft: #e8f0fe;
+      --ok: #0d9488;
+      --warn: #b45309;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(30, 60, 100, 0.08);
+      --focus: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #e8edf5 0%, #f4f6fa 50%, #eef1f6 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .page-wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .hero {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px 22px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .hero-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .hero h1 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+
+    .hero .subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .save-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 14px;
+    }
+
+    .save-row .btn {
+      flex-shrink: 0;
+    }
+
+    .save-row .btn-primary {
+      font-weight: 600;
+    }
+
+    .save-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      min-height: 36px;
+    }
+
+    .save-badge.saving {
+      background: #fffbeb;
+      color: var(--warn);
+      border-color: #fcd34d;
+    }
+
+    .save-badge.saved {
+      background: #ecfdf5;
+      color: var(--ok);
+      border-color: #99f6e4;
+    }
+
+    .save-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .save-badge.saving .dot {
+      background: #f59e0b;
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+
+    .save-badge.saved .dot {
+      background: var(--ok);
+    }
+
+    .hero-export {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .hero-export-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+    }
+
+    .hero-export-inner .hero-export-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 220px;
+      min-width: 0;
+    }
+
+    .hero-export-inner .hero-export-title {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin: 0;
+      align-self: center;
+    }
+
+    .hero-help-btn {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-help-btn:hover {
+      border-color: var(--accent2);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .hero-help-btn:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .export-dir-picked-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #047857;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      line-height: 1.2;
+    }
+
+    .export-dir-picked-badge[hidden] {
+      display: none !important;
+    }
+
+    .export-dir-picked-badge .export-dir-picked-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      flex-shrink: 0;
+    }
+
+    .hero-export-help-panel {
+      margin-top: 10px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .hero-export-help-panel .hero-export-status {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .hero-export-help-panel .hero-export-hint {
+      margin: 10px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .hero-export-inner .btn {
+      flex: 0 0 auto;
+      padding: 9px 14px;
+      font-size: 13px;
+    }
+
+    .hero-export-help-panel .hero-export-hint strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    @keyframes pulse {
+      50% { opacity: 0.35; transform: scale(0.9); }
+    }
+
+    .container {
+      background: var(--card);
+      padding: 0 22px 28px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .tip {
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      margin: 20px 0 8px;
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .tip strong { color: #92400e; }
+
+    .section-card {
+      margin-top: 22px;
+      padding-top: 4px;
+    }
+
+    .section-card h2 {
+      margin: 0 0 14px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-card h2::before {
+      content: "";
+      width: 4px;
+      height: 1.1em;
+      border-radius: 2px;
+      background: linear-gradient(180deg, var(--accent2), var(--accent));
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 20px;
+    }
+
+    .field label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 7px;
+      color: #334155;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fafbfc;
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    input:hover, select:hover, textarea:hover {
+      border-color: #c5d0dd;
+      background: #fff;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent2);
+      box-shadow: var(--focus);
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table.sheet {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: var(--card);
+    }
+
+    .sheet th, .sheet td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .sheet th {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      font-weight: 600;
+      color: #475569;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .sheet tbody tr:nth-child(even) td {
+      background: #fafbfc;
+    }
+
+    .sheet tbody tr:hover td {
+      background: var(--accent-soft);
+    }
+
+    .sheet td:first-child {
+      font-weight: 500;
+      max-width: 420px;
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent2);
+      cursor: pointer;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #475569;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+    }
+
+    .chip:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .chip input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .chip:has(input:checked) {
+      background: var(--accent-soft);
+      border-color: var(--accent2);
+      color: var(--accent);
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(37, 99, 235, 0.15);
+    }
+
+    .chip.chip-active {
+      background: var(--accent-soft);
+      border-color: var(--accent2);
+      color: var(--accent);
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(37, 99, 235, 0.15);
+    }
+
+    .chip-manual-input {
+      max-width: 200px;
+      margin-top: 4px;
+      font-size: 13px;
+    }
+
+    .chip-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 6px;
+    }
+
+    .field-chips-wide {
+      grid-column: 1 / -1;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.1s, box-shadow 0.15s;
+    }
+
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, #1e3a5f 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(30, 74, 122, 0.25);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 4px 14px rgba(30, 74, 122, 0.35);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-danger {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .btn-danger:hover {
+      background: #fee2e2;
+    }
+
+    .footnote {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-top {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <header class="hero">
+    <div class="hero-top">
+      <div>
+        <h1>项目资料上报确认单 · 生成器</h1>
+        <p class="subtitle">本地填写，不上传服务器；内容实时保存到本机浏览器</p>
+      </div>
+      <div class="save-row">
+        <button type="button" class="btn btn-primary" onclick="downloadFiles()">生成并下载 MD + JSON</button>
+        <span id="autosaveStatus" class="save-badge" aria-live="polite">
+          <span class="dot"></span>
+          <span id="autosaveText">就绪</span>
+        </span>
+        <button type="button" class="btn btn-secondary" id="importJsonBtn" title="选择先前下载的 JSON 文件恢复表单">
+          从 JSON 导入…
+        </button>
+        <input
+          type="file"
+          id="importJsonInput"
+          accept=".json,application/json"
+          style="position:absolute;width:0;height:0;opacity:0;pointer-events:none"
+          tabindex="-1"
+          aria-hidden="true"
+        />
+        <button type="button" class="btn btn-danger" onclick="clearDraft()">清空草稿</button>
+      </div>
+    </div>
+    <div class="hero-export" role="group" aria-labelledby="export_dir_heading">
+      <div class="hero-export-inner">
+        <div class="hero-export-title-row">
+          <p class="hero-export-title" id="export_dir_heading">导出保存位置（选择电脑上的文件夹）</p>
+          <span id="exportDirPickedBadge" class="export-dir-picked-badge" hidden title="已选择保存文件夹，生成时将写入该目录">
+            <span class="export-dir-picked-dot" aria-hidden="true"></span>
+            已选
+          </span>
+          <button type="button" class="hero-help-btn" id="heroExportHelpBtn" aria-expanded="false" aria-controls="heroExportHelpPanel" aria-label="查看导出保存说明（含当前状态与操作提示）" title="查看说明">?</button>
+        </div>
+        <button type="button" class="btn btn-secondary" id="pickExportDirBtn">选择文件夹…</button>
+        <button type="button" class="btn btn-secondary" id="clearExportDirBtn" style="display:none">清除选择</button>
+      </div>
+      <div id="heroExportHelpPanel" class="hero-export-help-panel" hidden role="region" aria-label="导出保存说明">
+        <p class="hero-export-status" id="exportDirStatus">未选择文件夹：点击「生成并下载」时将使用浏览器默认下载位置。</p>
+        <p class="hero-export-hint">
+          建议先在资源管理器中进入资料包内的 <strong>01_管理确认</strong> 文件夹，再点「选择文件夹」选中该目录；生成时会把 MD、JSON <strong>直接写入</strong>该文件夹。需使用 Chrome / Edge 等支持「选择文件夹」的浏览器；不支持时将退回普通下载。
+        </p>
+      </div>
+    </div>
+  </header>
+
+<div class="container">
+  <div class="tip">
+    本页面仅在本地浏览器运行，不上传资料。填写时会<strong>自动保存草稿</strong>；页顶可<strong>选择 JSON 文件导入</strong>以恢复先前导出的内容。完成后可在页顶<strong>选择电脑文件夹</strong>（建议 <b>01_管理确认</b>），再点页顶<strong>生成并下载</strong>将 MD、JSON 写入该文件夹。
+  </div>
+
+  <div class="section-card">
+  <h2>一、项目基本信息</h2>
+  <div class="grid">
+    <div class="field">
+      <label>分公司名称</label>
+      <input id="branch_name" placeholder="如：福建分公司" autocomplete="organization" />
+    </div>
+    <div class="field">
+      <label>客户单位</label>
+      <input id="customer_name" placeholder="如：福建省烟草" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>项目名称</label>
+      <input id="project_name" placeholder="如：卷烟营销管理平台" autocomplete="off" />
+    </div>
+    <div class="field field-chips-wide">
+      <label>项目年份</label>
+      <p class="chip-hint">点选常用年份，或在下方填写其他年份（4 位数字）</p>
+      <input type="hidden" id="project_year" value="" autocomplete="off" />
+      <div class="chip-row" id="yearChipRow" role="radiogroup" aria-label="项目年份快捷选择"></div>
+      <input type="text" id="project_year_manual" class="chip-manual-input" placeholder="手动填写，如 2023" maxlength="4" inputmode="numeric" autocomplete="off" />
+    </div>
+    <div class="field field-chips-wide">
+      <label>项目状态</label>
+      <input type="hidden" id="project_status" value="" />
+      <div class="chip-row" id="statusChipRow" role="radiogroup" aria-label="项目状态"></div>
+    </div>
+    <div class="field">
+      <label>业务板块</label>
+      <select id="business_domain">
+        <option value="">请选择</option>
+        <option>卷烟营销</option>
+        <option>专卖管理</option>
+        <option>仓储物流</option>
+        <option>烟叶生产</option>
+        <option>烟叶收购</option>
+        <option>数据分析</option>
+        <option>其他</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>提交日期</label>
+      <input id="submit_date" placeholder="如：20250318" inputmode="numeric" autocomplete="off" />
+    </div>
+    <div class="field field-chips-wide">
+      <label>是否涉敏</label>
+      <input type="hidden" id="is_sensitive" value="" />
+      <div class="chip-row" id="sensChipRow" role="radiogroup" aria-label="是否涉敏"></div>
+    </div>
+    <div class="field field-chips-wide">
+      <label>是否作为 AI 入库候选</label>
+      <input type="hidden" id="ai_candidate_status" value="" />
+      <div class="chip-row" id="aiChipRow" role="radiogroup" aria-label="是否作为 AI 入库候选"></div>
+    </div>
+  </div>
+  </div>
+
+  <div class="section-card">
+  <h2>二、资料提交清单</h2>
+  <div class="table-wrap">
+  <table class="sheet">
+    <thead>
+    <tr>
+      <th>材料项</th>
+      <th>是否提交</th>
+      <th>备注</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>资料包名称</td>
+      <td>—</td>
+      <td><input id="package_name" placeholder="如：福建省烟草_卷烟营销管理平台_2025_已验收" autocomplete="off" /></td>
+    </tr>
+    <tr>
+      <td>项目基本信息表</td>
+      <td><input class="checkbox" type="checkbox" id="m_project_basic_info" /></td>
+      <td><input id="n_project_basic_info" placeholder="备注" /></td>
+    </tr>
+    <tr>
+      <td>建设方案 / 投标方案 / 汇报方案</td>
+      <td><input class="checkbox" type="checkbox" id="m_solution_plan" /></td>
+      <td><input id="n_solution_plan" placeholder="三选一" /></td>
+    </tr>
+    <tr>
+      <td>需求规格说明书 / 功能清单</td>
+      <td><input class="checkbox" type="checkbox" id="m_requirement_or_function" /></td>
+      <td><input id="n_requirement_or_function" placeholder="二选一" /></td>
+    </tr>
+    <tr>
+      <td>业务流程图</td>
+      <td><input class="checkbox" type="checkbox" id="m_business_flow" /></td>
+      <td><input id="n_business_flow" placeholder="有则提交" /></td>
+    </tr>
+    <tr>
+      <td>用户手册 / 操作手册 / 培训资料</td>
+      <td><input class="checkbox" type="checkbox" id="m_manual_or_training" /></td>
+      <td><input id="n_manual_or_training" placeholder="三选一" /></td>
+    </tr>
+    <tr>
+      <td>验收报告 / 最终交付清单</td>
+      <td><input class="checkbox" type="checkbox" id="m_acceptance_or_delivery" /></td>
+      <td><input id="n_acceptance_or_delivery" placeholder="已验收项目建议提交" /></td>
+    </tr>
+    <tr>
+      <td>项目知识沉淀表 / 项目复盘表 / 项目知识简表 / 无复盘资料说明</td>
+      <td><input class="checkbox" type="checkbox" id="m_knowledge_summary" /></td>
+      <td><input id="n_knowledge_summary" placeholder="旧项目可用简表或无复盘说明" /></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+  </div>
+
+  <div class="section-card">
+  <h2>三、安全确认</h2>
+  <div class="grid">
+    <div class="field">
+      <label>是否已识别涉敏资料</label>
+      <select id="security_identified">
+        <option value="">请选择</option>
+        <option>是</option>
+        <option>否</option>
+        <option>不涉及</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>是否已脱敏或标记敏感</label>
+      <select id="security_sanitized_or_marked">
+        <option value="">请选择</option>
+        <option>是</option>
+        <option>否</option>
+        <option>不涉及</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>是否未上传云端附件</label>
+      <select id="no_cloud_attachment">
+        <option value="">请选择</option>
+        <option>是</option>
+        <option>否</option>
+      </select>
+    </div>
+  </div>
+  </div>
+
+  <div class="section-card">
+  <h2>四、责任人确认</h2>
+  <div class="grid">
+    <div class="field">
+      <label>资料整理人</label>
+      <input id="material_owner" autocomplete="name" />
+    </div>
+    <div class="field">
+      <label>资料整理人部门 / 岗位</label>
+      <input id="material_owner_role" autocomplete="organization-title" />
+    </div>
+    <div class="field">
+      <label>项目负责人</label>
+      <input id="project_owner" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>项目负责人部门 / 岗位</label>
+      <input id="project_owner_role" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>分公司负责人</label>
+      <input id="branch_owner" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>分公司负责人部门 / 岗位</label>
+      <input id="branch_owner_role" autocomplete="off" />
+    </div>
+    <div class="field" style="grid-column: 1 / -1;">
+      <label>确认方式</label>
+      <select id="confirmation_method">
+        <option value="">请选择</option>
+        <option>姓名确认</option>
+        <option>内网系统提交留痕</option>
+        <option>OA / 钉钉审批留痕，不上传资料附件</option>
+        <option>电子签名</option>
+        <option>其他</option>
+      </select>
+    </div>
+  </div>
+  </div>
+
+  <div class="section-card">
+  <h2>五、补充说明</h2>
+  <textarea id="remark" placeholder="可填写特殊说明，如旧项目无复盘、原负责人离职、敏感资料另行隔离等。"></textarea>
+  </div>
+
+  <div class="footnote">
+    草稿实时保存在本机浏览器（关闭页面前会自动写入）。页顶「从 JSON 导入」可选择先前下载的 <code>.json</code> 恢复表单。建议导出文件名：<code>项目资料上报确认单_提交日期.md</code> / <code>.json</code>。若已选择保存文件夹，文件将直接写入该目录；所选文件夹在本机会记住（同一浏览器、同一站点）。
+  </div>
+</div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const DRAFT_KEY = "project_confirm_form_draft_v2";
+  const AUTOSAVE_DEBOUNCE_MS = 450;
+  const IDB_NAME = "project_confirm_fs_v1";
+  const IDB_STORE = "handles";
+  const IDB_KEY_EXPORT_DIR = "exportDir";
+
+  const fieldIds = [
+    "branch_name", "customer_name", "project_name", "project_year", "project_year_manual", "project_status",
+    "business_domain", "submit_date", "is_sensitive",
+    "ai_candidate_status",
+    "package_name",
+    "m_project_basic_info", "m_solution_plan", "m_requirement_or_function",
+    "m_business_flow", "m_manual_or_training", "m_acceptance_or_delivery",
+    "m_knowledge_summary",
+    "n_project_basic_info", "n_solution_plan", "n_requirement_or_function",
+    "n_business_flow", "n_manual_or_training", "n_acceptance_or_delivery",
+    "n_knowledge_summary",
+    "security_identified", "security_sanitized_or_marked", "no_cloud_attachment",
+    "material_owner", "material_owner_role", "project_owner", "project_owner_role",
+    "branch_owner", "branch_owner_role", "confirmation_method", "remark"
+  ];
+
+  let autosaveTimer = null;
+  let suppressAutosave = false;
+  let exportDirectoryHandle = null;
+
+  function pad2(n) {
+    return n < 10 ? "0" + n : String(n);
+  }
+
+  function todayYYYYMMDD() {
+    var d = new Date();
+    return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate());
+  }
+
+  function ensureDefaultSubmitDate() {
+    var el = document.getElementById("submit_date");
+    if (!el) return;
+    if ((el.value || "").trim()) return;
+    el.value = todayYYYYMMDD();
+    scheduleAutosave();
+  }
+
+  function idbOpenDb() {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(IDB_NAME, 1);
+      req.onerror = function () {
+        reject(req.error);
+      };
+      req.onupgradeneeded = function (ev) {
+        var db = ev.target.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) {
+          db.createObjectStore(IDB_STORE);
+        }
+      };
+      req.onsuccess = function () {
+        resolve(req.result);
+      };
+    });
+  }
+
+  function idbPut(key, value) {
+    return idbOpenDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(IDB_STORE, "readwrite");
+        tx.oncomplete = function () {
+          db.close();
+          resolve();
+        };
+        tx.onerror = function () {
+          reject(tx.error);
+        };
+        tx.objectStore(IDB_STORE).put(value, key);
+      });
+    });
+  }
+
+  function idbGet(key) {
+    return idbOpenDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(IDB_STORE, "readonly");
+        var r = tx.objectStore(IDB_STORE).get(key);
+        r.onsuccess = function () {
+          resolve(r.result);
+        };
+        r.onerror = function () {
+          reject(r.error);
+        };
+        tx.oncomplete = function () {
+          db.close();
+        };
+      });
+    });
+  }
+
+  function idbDelete(key) {
+    return idbOpenDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(IDB_STORE, "readwrite");
+        tx.oncomplete = function () {
+          db.close();
+          resolve();
+        };
+        tx.onerror = function () {
+          reject(tx.error);
+        };
+        tx.objectStore(IDB_STORE).delete(key);
+      });
+    });
+  }
+
+  async function persistExportDirectoryHandleToIdb(handle) {
+    try {
+      await idbPut(IDB_KEY_EXPORT_DIR, handle);
+    } catch (e) {
+      console.warn("保存文件夹句柄失败", e);
+    }
+  }
+
+  async function restoreExportDirectoryHandleFromIdb() {
+    try {
+      var handle = await idbGet(IDB_KEY_EXPORT_DIR);
+      if (!handle || typeof handle.queryPermission !== "function") return;
+      var perm = await handle.queryPermission({ mode: "readwrite" });
+      if (perm === "granted") {
+        exportDirectoryHandle = handle;
+        return;
+      }
+      if (perm === "prompt") {
+        try {
+          perm = await handle.requestPermission({ mode: "readwrite" });
+        } catch (e) {
+          perm = "prompt";
+        }
+      }
+      if (perm === "granted") {
+        exportDirectoryHandle = handle;
+      } else if (perm === "denied") {
+        try {
+          await idbDelete(IDB_KEY_EXPORT_DIR);
+        } catch (e2) {}
+      }
+    } catch (e) {
+      console.warn("恢复文件夹句柄失败", e);
+    }
+  }
+
+  function updateExportDirStatusUI() {
+    var statusEl = document.getElementById("exportDirStatus");
+    var clearBtn = document.getElementById("clearExportDirBtn");
+    var pickedBadge = document.getElementById("exportDirPickedBadge");
+    if (!statusEl) return;
+    if (exportDirectoryHandle && exportDirectoryHandle.name) {
+      statusEl.textContent =
+        "已选择文件夹：「" +
+        exportDirectoryHandle.name +
+        "」。生成时将把 MD、JSON 直接保存到该文件夹（浏览器出于隐私不会显示完整磁盘路径）。";
+      if (clearBtn) clearBtn.style.display = "";
+      if (pickedBadge) pickedBadge.hidden = false;
+    } else {
+      statusEl.textContent =
+        "未选择文件夹：点击「生成并下载」时将使用浏览器默认下载位置。";
+      if (clearBtn) clearBtn.style.display = "none";
+      if (pickedBadge) pickedBadge.hidden = true;
+    }
+  }
+
+  async function pickExportDirectory() {
+    if (typeof window.showDirectoryPicker !== "function") {
+      alert(
+        "当前浏览器不支持「选择文件夹」。请使用 Chrome / Edge 最新版；也可直接使用默认下载。"
+      );
+      return;
+    }
+    try {
+      exportDirectoryHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+      await persistExportDirectoryHandleToIdb(exportDirectoryHandle);
+      updateExportDirStatusUI();
+    } catch (e) {
+      if (e && e.name !== "AbortError") {
+        alert("选择文件夹失败：" + (e.message || String(e)));
+      }
+    }
+  }
+
+  async function writeUtf8FileToDirectory(dirHandle, filename, text, mimeType) {
+    var fh = await dirHandle.getFileHandle(filename, { create: true });
+    var writable = await fh.createWritable();
+    await writable.write(new Blob([text], { type: mimeType || "application/octet-stream" }));
+    await writable.close();
+  }
+
+  function initExportDirectoryPicker() {
+    var pickBtn = document.getElementById("pickExportDirBtn");
+    var clearBtn = document.getElementById("clearExportDirBtn");
+    if (pickBtn) {
+      pickBtn.addEventListener("click", function () {
+        pickExportDirectory();
+      });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        exportDirectoryHandle = null;
+        idbDelete(IDB_KEY_EXPORT_DIR).catch(function () {});
+        updateExportDirStatusUI();
+      });
+    }
+    updateExportDirStatusUI();
+  }
+
+  function initHeroExportHelpPanel() {
+    var btn = document.getElementById("heroExportHelpBtn");
+    var panel = document.getElementById("heroExportHelpPanel");
+    if (!btn || !panel) return;
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var open = panel.hidden;
+      panel.hidden = !open;
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    document.addEventListener("click", function (e) {
+      if (panel.hidden) return;
+      if (btn.contains(e.target) || panel.contains(e.target)) return;
+      panel.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape" || panel.hidden) return;
+      panel.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+      try {
+        btn.focus();
+      } catch (err) {}
+    });
+  }
+
+  const STATUS_LABELS = ["已验收", "已上线", "实施中", "运维中", "其他"];
+  const SENS_LABELS = ["是", "否", "不确定"];
+  const AI_CANDIDATE_LABELS = ["是", "否", "待总部审核"];
+
+  function refreshYearChipStyles() {
+    document.querySelectorAll("#yearChipRow .chip").forEach(function (lab) {
+      var inp = lab.querySelector('input[type="radio"]');
+      lab.classList.toggle("chip-active", !!(inp && inp.checked));
+    });
+  }
+
+  function refreshStatusChipStyles() {
+    document.querySelectorAll("#statusChipRow .chip").forEach(function (lab) {
+      var inp = lab.querySelector('input[type="radio"]');
+      lab.classList.toggle("chip-active", !!(inp && inp.checked));
+    });
+  }
+
+  function refreshSensChipStyles() {
+    document.querySelectorAll("#sensChipRow .chip").forEach(function (lab) {
+      var inp = lab.querySelector('input[type="radio"]');
+      lab.classList.toggle("chip-active", !!(inp && inp.checked));
+    });
+  }
+
+  function refreshAiChipStyles() {
+    document.querySelectorAll("#aiChipRow .chip").forEach(function (lab) {
+      var inp = lab.querySelector('input[type="radio"]');
+      lab.classList.toggle("chip-active", !!(inp && inp.checked));
+    });
+  }
+
+  function syncYearHidden() {
+    var hid = document.getElementById("project_year");
+    var manualEl = document.getElementById("project_year_manual");
+    if (!hid) return;
+    var manual = manualEl ? manualEl.value.trim() : "";
+    if (/^\d{4}$/.test(manual)) {
+      hid.value = manual;
+      document.querySelectorAll('input[name="year_pick"]').forEach(function (r) {
+        r.checked = r.value === manual;
+      });
+      refreshYearChipStyles();
+      return;
+    }
+    var c = document.querySelector('input[name="year_pick"]:checked');
+    hid.value = c ? c.value : "";
+    refreshYearChipStyles();
+  }
+
+  function syncYearUIFromHidden() {
+    var hid = document.getElementById("project_year");
+    var manualEl = document.getElementById("project_year_manual");
+    if (!hid) return;
+    var v = (hid.value || "").trim();
+    var chipYears = [];
+    document.querySelectorAll('input[name="year_pick"]').forEach(function (r) {
+      chipYears.push(r.value);
+    });
+    if (!v) {
+      document.querySelectorAll('input[name="year_pick"]').forEach(function (r) {
+        r.checked = false;
+      });
+      if (manualEl) manualEl.value = "";
+      refreshYearChipStyles();
+      return;
+    }
+    if (chipYears.indexOf(v) >= 0) {
+      document.querySelectorAll('input[name="year_pick"]').forEach(function (r) {
+        r.checked = r.value === v;
+      });
+      if (manualEl) manualEl.value = "";
+    } else {
+      document.querySelectorAll('input[name="year_pick"]').forEach(function (r) {
+        r.checked = false;
+      });
+      if (manualEl) manualEl.value = v;
+    }
+    refreshYearChipStyles();
+  }
+
+  function syncStatusHidden() {
+    var c = document.querySelector('input[name="status_pick"]:checked');
+    var hid = document.getElementById("project_status");
+    if (hid) hid.value = c ? c.value : "";
+    refreshStatusChipStyles();
+  }
+
+  function syncStatusUIFromHidden() {
+    var hid = document.getElementById("project_status");
+    if (!hid) return;
+    var v = (hid.value || "").trim();
+    document.querySelectorAll('input[name="status_pick"]').forEach(function (r) {
+      r.checked = r.value === v;
+    });
+    refreshStatusChipStyles();
+  }
+
+  function syncSensHidden() {
+    var c = document.querySelector('input[name="sens_pick"]:checked');
+    var hid = document.getElementById("is_sensitive");
+    if (hid) hid.value = c ? c.value : "";
+    refreshSensChipStyles();
+  }
+
+  function syncSensUIFromHidden() {
+    var hid = document.getElementById("is_sensitive");
+    if (!hid) return;
+    var v = (hid.value || "").trim();
+    document.querySelectorAll('input[name="sens_pick"]').forEach(function (r) {
+      r.checked = r.value === v;
+    });
+    refreshSensChipStyles();
+  }
+
+  function syncAiHidden() {
+    var c = document.querySelector('input[name="ai_pick"]:checked');
+    var hid = document.getElementById("ai_candidate_status");
+    if (hid) hid.value = c ? c.value : "";
+    refreshAiChipStyles();
+  }
+
+  function syncAiUIFromHidden() {
+    var hid = document.getElementById("ai_candidate_status");
+    if (!hid) return;
+    var v = (hid.value || "").trim();
+    document.querySelectorAll('input[name="ai_pick"]').forEach(function (r) {
+      r.checked = r.value === v;
+    });
+    refreshAiChipStyles();
+  }
+
+  function syncAllChipsToHidden() {
+    syncYearHidden();
+    syncStatusHidden();
+    syncSensHidden();
+    syncAiHidden();
+  }
+
+  function initYearChips() {
+    var wrap = document.getElementById("yearChipRow");
+    if (!wrap || wrap.dataset.inited === "1") return;
+    wrap.dataset.inited = "1";
+    var y0 = new Date().getFullYear();
+    var i, yr, lab, inp;
+    for (i = 0; i < 8; i++) {
+      yr = String(y0 - i);
+      lab = document.createElement("label");
+      lab.className = "chip";
+      lab.innerHTML =
+        '<input type="radio" name="year_pick" value="' +
+        yr +
+        '" /><span>' +
+        yr +
+        "年</span>";
+      inp = lab.querySelector("input");
+      inp.addEventListener("change", function () {
+        var me = document.getElementById("project_year_manual");
+        if (me) me.value = "";
+        syncYearHidden();
+        scheduleAutosave();
+      });
+      wrap.appendChild(lab);
+    }
+    var manualEl = document.getElementById("project_year_manual");
+    if (manualEl) {
+      manualEl.addEventListener("input", function () {
+        syncYearHidden();
+        scheduleAutosave();
+      });
+      manualEl.addEventListener("change", function () {
+        syncYearHidden();
+        scheduleAutosave();
+      });
+    }
+  }
+
+  function initStatusChips() {
+    var wrap = document.getElementById("statusChipRow");
+    if (!wrap || wrap.dataset.inited === "1") return;
+    wrap.dataset.inited = "1";
+    STATUS_LABELS.forEach(function (label) {
+      var lab = document.createElement("label");
+      lab.className = "chip";
+      var rad = document.createElement("input");
+      rad.type = "radio";
+      rad.name = "status_pick";
+      rad.value = label;
+      var span = document.createElement("span");
+      span.textContent = label;
+      lab.appendChild(rad);
+      lab.appendChild(span);
+      rad.addEventListener("change", function () {
+        syncStatusHidden();
+        scheduleAutosave();
+      });
+      wrap.appendChild(lab);
+    });
+  }
+
+  function initSensChips() {
+    var wrap = document.getElementById("sensChipRow");
+    if (!wrap || wrap.dataset.inited === "1") return;
+    wrap.dataset.inited = "1";
+    SENS_LABELS.forEach(function (label) {
+      var lab = document.createElement("label");
+      lab.className = "chip";
+      var rad = document.createElement("input");
+      rad.type = "radio";
+      rad.name = "sens_pick";
+      rad.value = label;
+      var span = document.createElement("span");
+      span.textContent = label;
+      lab.appendChild(rad);
+      lab.appendChild(span);
+      rad.addEventListener("change", function () {
+        syncSensHidden();
+        scheduleAutosave();
+      });
+      wrap.appendChild(lab);
+    });
+  }
+
+  function initAiChips() {
+    var wrap = document.getElementById("aiChipRow");
+    if (!wrap || wrap.dataset.inited === "1") return;
+    wrap.dataset.inited = "1";
+    AI_CANDIDATE_LABELS.forEach(function (label) {
+      var lab = document.createElement("label");
+      lab.className = "chip";
+      var rad = document.createElement("input");
+      rad.type = "radio";
+      rad.name = "ai_pick";
+      rad.value = label;
+      var span = document.createElement("span");
+      span.textContent = label;
+      lab.appendChild(rad);
+      lab.appendChild(span);
+      rad.addEventListener("change", function () {
+        syncAiHidden();
+        scheduleAutosave();
+      });
+      wrap.appendChild(lab);
+    });
+  }
+
+  function getValue(id) {
+    const el = document.getElementById(id);
+    if (!el) return "";
+    if (el.type === "checkbox") return el.checked;
+    return el.value.trim();
+  }
+
+  function setValue(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === "checkbox") {
+      el.checked = Boolean(value);
+    } else {
+      el.value = value || "";
+    }
+  }
+
+  function applyExportedJsonToForm(data) {
+    if (!data || typeof data !== "object") {
+      throw new Error("不是有效的 JSON 对象");
+    }
+    if (!data.project || typeof data.project !== "object") {
+      throw new Error("缺少 project 字段，请使用本页面「生成并下载」得到的 JSON");
+    }
+    var p = data.project;
+    var c = data.checklist || {};
+    var s = data.security || {};
+    var r = data.responsibility || {};
+
+    setValue("branch_name", p.branch_name || "");
+    setValue("customer_name", p.customer_name || "");
+    setValue("project_name", p.project_name || "");
+    setValue("project_year", p.project_year || "");
+    setValue("project_status", p.project_status || "");
+    setValue("business_domain", p.business_domain || "");
+    setValue("package_name", p.package_name || "");
+    setValue("submit_date", p.submit_date || "");
+    setValue("is_sensitive", p.is_sensitive || "");
+    setValue("ai_candidate_status", p.ai_candidate_status || "");
+
+    function applyCheck(item, mid, nid) {
+      if (!item || typeof item !== "object") return;
+      setValue(mid, item.submitted);
+      setValue(nid, item.note || "");
+    }
+    applyCheck(c.project_basic_info, "m_project_basic_info", "n_project_basic_info");
+    applyCheck(c.solution_plan, "m_solution_plan", "n_solution_plan");
+    applyCheck(c.requirement_or_function_list, "m_requirement_or_function", "n_requirement_or_function");
+    applyCheck(c.business_flow, "m_business_flow", "n_business_flow");
+    applyCheck(c.manual_or_training, "m_manual_or_training", "n_manual_or_training");
+    applyCheck(c.acceptance_or_delivery, "m_acceptance_or_delivery", "n_acceptance_or_delivery");
+    applyCheck(c.knowledge_summary_or_exemption, "m_knowledge_summary", "n_knowledge_summary");
+
+    setValue("security_identified", s.identified_sensitive_materials || "");
+    setValue("security_sanitized_or_marked", s.sanitized_or_marked || "");
+    setValue("no_cloud_attachment", s.no_cloud_attachment || "");
+
+    setValue("material_owner", r.material_owner || "");
+    setValue("material_owner_role", r.material_owner_role || "");
+    setValue("project_owner", r.project_owner || "");
+    setValue("project_owner_role", r.project_owner_role || "");
+    setValue("branch_owner", r.branch_owner || "");
+    setValue("branch_owner_role", r.branch_owner_role || "");
+    setValue("confirmation_method", r.confirmation_method || "");
+
+    setValue("remark", data.remark || "");
+  }
+
+  function initImportJsonFromFile() {
+    var inp = document.getElementById("importJsonInput");
+    var btn = document.getElementById("importJsonBtn");
+    if (btn && inp) {
+      btn.addEventListener("click", function () {
+        inp.click();
+      });
+    }
+    if (!inp) return;
+    inp.addEventListener("change", function () {
+      var file = inp.files && inp.files[0];
+      inp.value = "";
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var data = JSON.parse(String(reader.result || ""));
+          suppressAutosave = true;
+          try {
+            applyExportedJsonToForm(data);
+          } finally {
+            suppressAutosave = false;
+          }
+          syncYearUIFromHidden();
+          syncStatusUIFromHidden();
+          syncSensUIFromHidden();
+          syncAiUIFromHidden();
+          ensureDefaultSubmitDate();
+          persistDraftToStorage();
+          updateAutosaveBadge("saved", "已从 JSON 导入");
+        } catch (e) {
+          alert("导入失败：" + (e.message || String(e)));
+        }
+      };
+      reader.onerror = function () {
+        alert("读取文件失败");
+      };
+      reader.readAsText(file, "UTF-8");
+    });
+  }
+
+  function collectDraftPayload() {
+    const data = {};
+    fieldIds.forEach(function (id) {
+      data[id] = getValue(id);
+    });
+    return data;
+  }
+
+  function persistDraftToStorage() {
+    syncAllChipsToHidden();
+    const payload = {
+      schema: "project_confirm_draft_v2",
+      savedAt: new Date().toISOString(),
+      fields: collectDraftPayload()
+    };
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+      return true;
+    } catch (e) {
+      console.warn("草稿保存失败", e);
+      return false;
+    }
+  }
+
+  function updateAutosaveBadge(state, message) {
+    const badge = document.getElementById("autosaveStatus");
+    const text = document.getElementById("autosaveText");
+    if (!badge || !text) return;
+    badge.classList.remove("saving", "saved");
+    if (state === "saving") {
+      badge.classList.add("saving");
+      text.textContent = message || "正在保存…";
+    } else if (state === "saved") {
+      badge.classList.add("saved");
+      text.textContent = message || "已自动保存";
+    } else {
+      text.textContent = message || "就绪";
+    }
+  }
+
+  function scheduleAutosave() {
+    if (suppressAutosave) return;
+    updateAutosaveBadge("saving");
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(function () {
+      const ok = persistDraftToStorage();
+      if (ok) {
+        let t = "";
+        try {
+          t = new Date().toLocaleTimeString();
+        } catch (e) {
+          t = "";
+        }
+        updateAutosaveBadge("saved", t ? "已自动保存 · " + t : "已自动保存");
+      } else {
+        updateAutosaveBadge("", "保存失败（存储已满或被禁用）");
+      }
+    }, AUTOSAVE_DEBOUNCE_MS);
+  }
+
+  function restoreDraftFromStorage(silent) {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return false;
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      return false;
+    }
+    const fields = parsed.fields || parsed;
+    if (!fields || typeof fields !== "object") return false;
+    suppressAutosave = true;
+    try {
+      Object.keys(fields).forEach(function (id) {
+        if (fieldIds.indexOf(id) >= 0) setValue(id, fields[id]);
+      });
+    } finally {
+      suppressAutosave = false;
+    }
+    syncYearUIFromHidden();
+    syncStatusUIFromHidden();
+    syncSensUIFromHidden();
+    syncAiUIFromHidden();
+    if (silent) {
+      let t = "";
+      try {
+        if (parsed.savedAt) t = new Date(parsed.savedAt).toLocaleString();
+      } catch (e) {}
+      updateAutosaveBadge("saved", t ? "已恢复草稿 · " + t : "已恢复草稿");
+    }
+    return true;
+  }
+
+  function clearDraft() {
+    if (!confirm("确认清空本机草稿与当前表单吗？")) return;
+    localStorage.removeItem(DRAFT_KEY);
+    localStorage.removeItem("project_confirm_form_draft");
+    fieldIds.forEach(function (id) { setValue(id, ""); });
+    syncYearUIFromHidden();
+    syncStatusUIFromHidden();
+    syncSensUIFromHidden();
+    syncAiUIFromHidden();
+    ensureDefaultSubmitDate();
+    updateAutosaveBadge("", "草稿已清空");
+  }
+
+  function bindRealtimeAutosave() {
+    const root = document.querySelector(".container");
+    if (!root) return;
+    root.addEventListener(
+      "input",
+      function () {
+        scheduleAutosave();
+      },
+      true
+    );
+    root.addEventListener(
+      "change",
+      function () {
+        scheduleAutosave();
+      },
+      true
+    );
+  }
+
+  window.downloadFiles = async function () {
+    const data = collectData();
+
+    if (!data.project.project_name) {
+      alert("请填写项目名称");
+      return;
+    }
+
+    const date = data.project.submit_date || new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    const baseName = "项目资料上报确认单_" + date;
+
+    const md = buildMarkdown(data);
+    const json = JSON.stringify(data, null, 2);
+
+    if (exportDirectoryHandle) {
+      try {
+        await writeUtf8FileToDirectory(
+          exportDirectoryHandle,
+          baseName + ".md",
+          md,
+          "text/markdown;charset=utf-8"
+        );
+        await writeUtf8FileToDirectory(
+          exportDirectoryHandle,
+          baseName + ".json",
+          json,
+          "application/json;charset=utf-8"
+        );
+        persistDraftToStorage();
+        updateAutosaveBadge("saved", "已保存到所选文件夹");
+        alert(
+          "已将 MD 和 JSON 保存到所选文件夹「" +
+            exportDirectoryHandle.name +
+            "」。建议该文件夹为资料包内的 01_管理确认。"
+        );
+        return;
+      } catch (err) {
+        alert(
+          "写入所选文件夹失败：" +
+            (err && err.message ? err.message : String(err)) +
+            "。将改为浏览器默认下载。"
+        );
+      }
+    }
+
+    downloadText(baseName + ".md", md, "text/markdown;charset=utf-8");
+    downloadText(baseName + ".json", json, "application/json;charset=utf-8");
+
+    persistDraftToStorage();
+    updateAutosaveBadge("saved", "下载完成，草稿已同步");
+    alert(
+      "已触发浏览器下载 MD 和 JSON。请将文件移入资料包内的「01_管理确认」文件夹（或在页顶先「选择文件夹」再生成）。"
+    );
+  };
+
+  window.clearDraft = clearDraft;
+
+  function collectData() {
+    syncAllChipsToHidden();
+    return {
+      schema_version: "1.0",
+      document_type: "项目资料上报确认单",
+      project: {
+        branch_name: getValue("branch_name"),
+        customer_name: getValue("customer_name"),
+        project_name: getValue("project_name"),
+        project_year: getValue("project_year"),
+        project_status: getValue("project_status"),
+        business_domain: getValue("business_domain"),
+        package_name: getValue("package_name"),
+        submit_date: getValue("submit_date"),
+        is_sensitive: getValue("is_sensitive"),
+        ai_candidate_status: getValue("ai_candidate_status")
+      },
+      checklist: {
+        project_basic_info: {
+          submitted: getValue("m_project_basic_info"),
+          note: getValue("n_project_basic_info")
+        },
+        solution_plan: {
+          submitted: getValue("m_solution_plan"),
+          note: getValue("n_solution_plan")
+        },
+        requirement_or_function_list: {
+          submitted: getValue("m_requirement_or_function"),
+          note: getValue("n_requirement_or_function")
+        },
+        business_flow: {
+          submitted: getValue("m_business_flow"),
+          note: getValue("n_business_flow")
+        },
+        manual_or_training: {
+          submitted: getValue("m_manual_or_training"),
+          note: getValue("n_manual_or_training")
+        },
+        acceptance_or_delivery: {
+          submitted: getValue("m_acceptance_or_delivery"),
+          note: getValue("n_acceptance_or_delivery")
+        },
+        knowledge_summary_or_exemption: {
+          submitted: getValue("m_knowledge_summary"),
+          note: getValue("n_knowledge_summary")
+        }
+      },
+      security: {
+        identified_sensitive_materials: getValue("security_identified"),
+        sanitized_or_marked: getValue("security_sanitized_or_marked"),
+        no_cloud_attachment: getValue("no_cloud_attachment")
+      },
+      responsibility: {
+        material_owner: getValue("material_owner"),
+        material_owner_role: getValue("material_owner_role"),
+        project_owner: getValue("project_owner"),
+        project_owner_role: getValue("project_owner_role"),
+        branch_owner: getValue("branch_owner"),
+        branch_owner_role: getValue("branch_owner_role"),
+        confirmation_method: getValue("confirmation_method")
+      },
+      remark: getValue("remark"),
+      generated_at: new Date().toISOString()
+    };
+  }
+
+  function buildYaml(data) {
+    const p = data.project;
+    const r = data.responsibility;
+
+    return `---
+schema_version: "1.0"
+document_type: 项目资料上报确认单
+branch_name: ${p.branch_name || ""}
+customer_name: ${p.customer_name || ""}
+project_name: ${p.project_name || ""}
+project_year: "${p.project_year || ""}"
+project_status: ${p.project_status || ""}
+business_domain: ${p.business_domain || ""}
+package_name: ${p.package_name || ""}
+submit_date: "${p.submit_date || ""}"
+is_sensitive: ${p.is_sensitive || ""}
+ai_candidate_status: ${p.ai_candidate_status || ""}
+material_owner: ${r.material_owner || ""}
+project_owner: ${r.project_owner || ""}
+branch_owner: ${r.branch_owner || ""}
+confirmation_method: ${r.confirmation_method || ""}
+---
+`;
+  }
+
+  function yesNo(value) {
+    return value ? "是" : "否";
+  }
+
+  function buildMarkdown(data) {
+    const p = data.project;
+    const c = data.checklist;
+    const s = data.security;
+    const r = data.responsibility;
+
+    return `${buildYaml(data)}
+
+# 项目资料上报确认单
+
+> 说明：本确认单用于确认项目资料包的提交责任、资料真实性、资料完整性、密级与脱敏情况。  
+> 项目资料包不得作为钉钉、微信、个人网盘、个人邮箱等云端附件上传。  
+> 如需走钉钉 / OA 审批，可在清单中填写资料包名称及责任人、确认意见等，不上传真实项目资料附件。
+
+---
+
+## 一、项目基本信息
+
+| 字段 | 内容 |
+|---|---|
+| 分公司名称 | ${p.branch_name || ""} |
+| 客户单位 | ${p.customer_name || ""} |
+| 项目名称 | ${p.project_name || ""} |
+| 项目年份 | ${p.project_year || ""} |
+| 项目状态 | ${p.project_status || ""} |
+| 业务板块 | ${p.business_domain || ""} |
+| 提交日期 | ${p.submit_date || ""} |
+| 是否涉敏 | ${p.is_sensitive || ""} |
+| 是否作为 AI 入库候选 | ${p.ai_candidate_status || ""} |
+
+---
+
+## 二、资料提交清单
+
+| 序号 | 材料名称 | 是否提交 | 备注 |
+|---:|---|---|---|
+| 1 | 资料包名称 | — | ${p.package_name || ""} |
+| 2 | 项目基本信息表 | ${yesNo(c.project_basic_info.submitted)} | ${c.project_basic_info.note || ""} |
+| 3 | 建设方案 / 投标方案 / 汇报方案 | ${yesNo(c.solution_plan.submitted)} | ${c.solution_plan.note || ""} |
+| 4 | 需求规格说明书 / 功能清单 | ${yesNo(c.requirement_or_function_list.submitted)} | ${c.requirement_or_function_list.note || ""} |
+| 5 | 业务流程图 | ${yesNo(c.business_flow.submitted)} | ${c.business_flow.note || ""} |
+| 6 | 用户手册 / 操作手册 / 培训资料 | ${yesNo(c.manual_or_training.submitted)} | ${c.manual_or_training.note || ""} |
+| 7 | 验收报告 / 最终交付清单 | ${yesNo(c.acceptance_or_delivery.submitted)} | ${c.acceptance_or_delivery.note || ""} |
+| 8 | 项目知识沉淀表 / 项目复盘表 / 项目知识简表 / 无复盘资料说明 | ${yesNo(c.knowledge_summary_or_exemption.submitted)} | ${c.knowledge_summary_or_exemption.note || ""} |
+
+---
+
+## 三、安全确认
+
+| 确认项 | 结果 |
+|---|---|
+| 是否已识别涉敏资料 | ${s.identified_sensitive_materials || ""} |
+| 是否已脱敏或标记敏感 | ${s.sanitized_or_marked || ""} |
+| 是否未上传云端附件 | ${s.no_cloud_attachment || ""} |
+
+---
+
+## 四、责任人确认
+
+| 责任类型 | 姓名 | 部门 / 岗位 |
+|---|---|---|
+| 资料整理人 | ${r.material_owner || ""} | ${r.material_owner_role || ""} |
+| 项目负责人 | ${r.project_owner || ""} | ${r.project_owner_role || ""} |
+| 分公司负责人 | ${r.branch_owner || ""} | ${r.branch_owner_role || ""} |
+
+确认方式：${r.confirmation_method || ""}
+
+---
+
+## 五、补充说明
+
+${data.remark || ""}
+
+---
+
+## 六、承诺说明
+
+1. 本次提交的项目资料真实、有效，来源可追溯；
+2. 已按照公司资料整理要求进行目录归档和文件命名；
+3. 已对资料进行初步密级标记；
+4. 对涉及客户数据、合同报价、接口信息、账号密码、服务器信息、数据库信息等敏感内容，已按要求进行标记或脱敏；
+5. 未故意隐瞒、篡改、伪造、混入其他项目资料；
+6. 未通过钉钉、微信、个人网盘、个人邮箱等云端渠道上传真实项目资料附件；
+7. 后续如总部验收发现资料缺失、命名不规范、密级标记错误、脱敏不到位或内容失实，将按要求配合整改；
+8. 如因资料虚假、遗漏、违规提交或涉敏资料处理不当造成风险，由相关责任人按公司制度承担相应责任。
+`;
+  }
+
+  function safeFileNamePart(value) {
+    return (value || "")
+      .replace(/[\\/:*?"<>|]/g, "")
+      .replace(/\s+/g, "")
+      .trim();
+  }
+
+  function downloadText(filename, content, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function migrateLegacyDraft() {
+    if (localStorage.getItem(DRAFT_KEY)) return;
+    var leg = localStorage.getItem("project_confirm_form_draft");
+    if (!leg) return;
+    try {
+      var data = JSON.parse(leg);
+      localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({
+          schema: "project_confirm_draft_v2",
+          savedAt: new Date().toISOString(),
+          fields: data
+        })
+      );
+    } catch (e) {}
+  }
+
+  initYearChips();
+  initStatusChips();
+  initSensChips();
+  initAiChips();
+  initImportJsonFromFile();
+  initExportDirectoryPicker();
+  initHeroExportHelpPanel();
+  migrateLegacyDraft();
+  bindRealtimeAutosave();
+  if (restoreDraftFromStorage(true)) {
+    /* restored */
+  }
+  ensureDefaultSubmitDate();
+  restoreExportDirectoryHandleFromIdb().then(function () {
+    updateExportDirStatusUI();
+  });
+
+  window.addEventListener("beforeunload", function () {
+    persistDraftToStorage();
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") persistDraftToStorage();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "list_type": "responsibility",
+  "schema_version": "1.0",
+  "fields": {
+    "material_owner": "陈志强",
+    "material_owner_role": "承建单位项目经理",
+    "project_owner": "林建勋",
+    "project_owner_role": "市局项目负责人",
+    "branch_owner": "王和平",
+    "branch_owner_role": "市局信息中心主任",
+    "confirmation_method": "内网系统提交留痕"
+  },
+  "remarks": {
+    "title_zh": "责任人确认清单",
+    "column_labels_zh": {
+      "material_owner": "资料整理责任人",
+      "material_owner_role": "资料整理人角色",
+      "project_owner": "项目负责人",
+      "project_owner_role": "项目负责人角色",
+      "branch_owner": "分公司/部门负责人",
+      "branch_owner_role": "分公司负责人角色",
+      "confirmation_method": "确认方式"
+    }
+  },
+  "meta": {
+    "source_file": "第一批\\测试市局_演示_2026_待验收\\01_管理确认\\项目资料上报确认单_20260508.json",
+    "extracted_at": "2026-05-08T05:11:25Z"
+  }
+}

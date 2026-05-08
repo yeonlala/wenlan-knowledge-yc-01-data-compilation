@@ -1,0 +1,37 @@
+{
+  "list_type": "project_basic_info",
+  "schema_version": "1.0",
+  "source_document_type": "项目资料上报确认单",
+  "fields": {
+    "branch_name": "福建省烟草公司福州市公司333",
+    "customer_name": "福州市局信息中心2222",
+    "project_name": "福州烟草基层民主管理网升级改造项目",
+    "project_year": "2024",
+    "project_status": "运维中",
+    "business_domain": "数据分析",
+    "package_name": "FZYC_MZGL_2025_V1.0_验收归档资料包",
+    "submit_date": "20260508",
+    "is_sensitive": "否",
+    "ai_candidate_status": "是"
+  },
+  "remarks": {
+    "title_zh": "项目基础信息清单",
+    "column_labels_zh": {
+      "branch_name": "分公司名称",
+      "customer_name": "客户单位",
+      "project_name": "项目名称",
+      "project_year": "项目年份",
+      "project_status": "项目状态",
+      "business_domain": "业务板块",
+      "package_name": "资料包名称",
+      "submit_date": "提交日期",
+      "is_sensitive": "是否涉敏",
+      "ai_candidate_status": "是否作为AI入库候选"
+    }
+  },
+  "meta": {
+    "source_file": "第一批\\测试市局_演示_2026_待验收\\01_管理确认\\项目资料上报确认单_20260508.json",
+    "extracted_at": "2026-05-08T05:11:25Z",
+    "generated_at": "2026-05-08T05:09:22.047Z"
+  }
+}

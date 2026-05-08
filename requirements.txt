@@ -1,0 +1,15 @@
+# 验收报告 Excel
+openpyxl>=3.0
+# 汇总 HTML 中按项目卡片导出长图 PNG（Chromium 无头截图）
+playwright>=1.40
+# Mock 生成中文 PDF（--ext .pdf）时使用系统字体绘制文字
+reportlab>=4.0
+# Mock 将 mock_templates 内 Markdown 版式还原为 Word（标题/列表/表格等）
+python-docx>=1.1.0
+# 本地知识库准备脚本 prepare_local_kb.py 抽取 PDF（与 pypdf 互补）
+pypdf>=4.0
+pdfplumber>=0.11
+
+# 可选（体积较大）：结构化知识库顶配抽取链 — pip install docling markitdown
+# docling>=2.0
+# markitdown>=0.0.1
