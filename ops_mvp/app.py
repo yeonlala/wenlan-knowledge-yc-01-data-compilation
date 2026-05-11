@@ -23,6 +23,7 @@ from urllib.parse import quote
 
 from docx import Document
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from starlette.background import BackgroundTask
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
@@ -56,6 +57,7 @@ templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "tem
 MAX_JSON_READ_BYTES = 2 * 1024 * 1024
 MAX_PREVIEW_BINARY_BYTES = 20 * 1024 * 1024
 MAX_DOWNLOAD_BYTES = 80 * 1024 * 1024
+MAX_FOLDER_ZIP_BYTES = 512 * 1024 * 1024
 MAX_FIRST_BATCH_IMPORT_BYTES = 512 * 1024 * 1024
 MAX_TREE_NODES = 350
 
@@ -277,6 +279,25 @@ def _assert_workspace_delete_allowed(target: Path, root: Path) -> None:
             raise HTTPException(status_code=400, detail="禁止删除版本库目录 .git")
         except ValueError:
             pass
+
+
+def _assert_extract_jsons_zip_folder(target: Path, root: Path) -> None:
+    """仅允许将 extract_jsons 下的子目录（含嵌套）打包为 zip，禁止整包根目录 extract_jsons。"""
+    _assert_workspace_delete_allowed(target, root)
+    if not target.is_dir():
+        raise HTTPException(status_code=400, detail="只能打包目录")
+    rel = str(target.relative_to(root)).replace("\\", "/")
+    if rel == "extract_jsons":
+        raise HTTPException(
+            status_code=400,
+            detail="不能打包整个 extract_jsons 根目录，请进入后选择具体项目文件夹",
+        )
+    parts = rel.split("/")
+    if len(parts) < 2 or parts[0] != "extract_jsons":
+        raise HTTPException(
+            status_code=400,
+            detail="仅支持打包 extract_jsons 下的子文件夹",
+        )
 
 
 def _allocate_dest_under(parent: Path, folder_name: str) -> Tuple[Path, str]:
@@ -993,6 +1014,49 @@ def api_browse(relative: str = "extract_jsons", q: str = "") -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e)) from e
     base_rel = str(base.relative_to(root)).replace("\\", "/")
     return {"base": base_rel, "parent": parent_rel, "items": items, "filter": q or ""}
+
+
+@app.get("/api/workspace/download-zip")
+def api_workspace_download_zip(relative: str) -> FileResponse:
+    """将 extract_jsons 下的单个子文件夹打成 zip 下载（不含整个 extract_jsons 根）。"""
+    root = _root_resolved()
+    base = safe_relative_path(relative)
+    _assert_extract_jsons_zip_folder(base, root)
+
+    total = 0
+    for fp in base.rglob("*"):
+        if fp.is_file():
+            try:
+                total += fp.stat().st_size
+            except OSError:
+                continue
+            if total > MAX_FOLDER_ZIP_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"文件夹总体积超过上限（约 {MAX_FOLDER_ZIP_BYTES // (1024 * 1024)} MB）",
+                )
+
+    td = Path(tempfile.mkdtemp())
+    archive_base = td / "pack"
+    out_zip = str(archive_base) + ".zip"
+    try:
+        shutil.make_archive(str(archive_base), "zip", root_dir=str(base.resolve()))
+    except OSError as e:
+        shutil.rmtree(td, ignore_errors=True)
+        raise HTTPException(status_code=500, detail=f"打包失败：{e}") from e
+    if not os.path.isfile(out_zip):
+        shutil.rmtree(td, ignore_errors=True)
+        raise HTTPException(status_code=500, detail="打包未生成文件")
+
+    def _cleanup_pack() -> None:
+        shutil.rmtree(td, ignore_errors=True)
+
+    return FileResponse(
+        path=out_zip,
+        media_type="application/zip",
+        filename=f"{base.name}.zip",
+        background=BackgroundTask(_cleanup_pack),
+    )
 
 
 @app.post("/api/workspace/delete")

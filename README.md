@@ -13,6 +13,16 @@ python 1_check_tobacco_kb_required_files.py
 
 第二个命令默认扫描当前目录下的 **`第一批`**。报告生成在同级 **`检查结果`** 中。
 
+## 运维可视化（可选）
+
+在**仓库根目录**启动本地 Web 面板（`ops_mvp`）：
+
+```bash
+uvicorn ops_mvp.app:app --host 127.0.0.1 --port 8765
+```
+
+浏览器访问：**http://127.0.0.1:8765**。依赖已写在 **`requirements.txt`**（含 `fastapi`、`uvicorn`）；开发时可加 **`--reload`** 自动重载。
+
 ## 文档
 
 | 文档 | 内容 |

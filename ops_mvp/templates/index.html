@@ -452,8 +452,30 @@
     ul.browse li { padding: 0.28rem 0; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
     a.dirlink { cursor: pointer; color: var(--accent); }
     a.filelink { cursor: pointer; color: var(--text); text-decoration: underline dotted; }
-    ul.browse li button.browse-del {
+    ul.browse li span.browse-actions {
       margin-left: auto;
+      display: inline-flex;
+      gap: 0.35rem;
+      flex-shrink: 0;
+      align-items: center;
+    }
+    ul.browse li button.browse-zip {
+      font-size: 0.72rem;
+      padding: 0.12rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--accent);
+      background: rgba(77, 159, 255, 0.12);
+      color: var(--accent);
+      cursor: pointer;
+    }
+    ul.browse li button.browse-zip:hover:not(:disabled) {
+      filter: brightness(1.12);
+    }
+    ul.browse li button.browse-zip:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+    ul.browse li button.browse-del {
       flex-shrink: 0;
       font-size: 0.72rem;
       padding: 0.12rem 0.5rem;
@@ -952,7 +974,7 @@
       </section>
 
       <section id="sec-files" class="block">
-        <h2>目录内容 <span class="hint">当前路径下的子项；可预览常见文件；每行可删除文件或文件夹（不可恢复）</span></h2>
+        <h2>目录内容 <span class="hint">当前路径下的子项；可预览常见文件。<strong>extract_jsons</strong> 下的目录行可 <strong>ZIP</strong> 打包下载。进入子目录后，可删除文件或文件夹（不可恢复）；<strong>浏览仓库根目录时不显示删除</strong>。</span></h2>
         <div class="jump-row" id="jump_bar"></div>
         <p class="mono mini" id="browse_path">extract_jsons</p>
         <p id="browse_dir_hint" class="mini" style="margin:0.35rem 0 0.65rem;line-height:1.5;color:var(--muted);display:none;"></p>
@@ -1501,7 +1523,51 @@
 
     let browseBase = "extract_jsons";
 
-    function appendBrowseDelete(li, relative, displayName) {
+    function browseRowEligibleExtractJsonsZip(it) {
+      if (it.type !== "dir") return false;
+      const r = (it.relative || "").replace(/\\/g, "/");
+      return r.startsWith("extract_jsons/") && r !== "extract_jsons";
+    }
+
+    function appendBrowseZip(parent, relative, displayName) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "browse-zip";
+      btn.textContent = "ZIP";
+      btn.title = "打包下载该文件夹（仅 extract_jsons 下子目录）";
+      btn.onclick = async (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        btn.disabled = true;
+        try {
+          const res = await fetch(
+            "/api/workspace/download-zip?relative=" + encodeURIComponent(relative)
+          );
+          if (!res.ok) {
+            let msg = await res.text();
+            try {
+              const j = JSON.parse(msg);
+              if (typeof j.detail === "string") msg = j.detail;
+              else if (j.detail != null) msg = JSON.stringify(j.detail);
+            } catch (e) {}
+            alert(msg || res.statusText || "下载失败");
+            return;
+          }
+          const blob = await res.blob();
+          const u = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = u;
+          a.download = displayName + ".zip";
+          a.click();
+          URL.revokeObjectURL(u);
+        } finally {
+          btn.disabled = false;
+        }
+      };
+      parent.appendChild(btn);
+    }
+
+    function appendBrowseDelete(parent, relative, displayName) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "browse-del";
@@ -1536,7 +1602,7 @@
         await loadOverview();
         await loadBrowse(browseBase);
       };
-      li.appendChild(btn);
+      parent.appendChild(btn);
     }
 
     async function loadBrowse(rel) {
@@ -1547,7 +1613,7 @@
         if (rel === "extract_jsons" || rel.startsWith("extract_jsons/")) {
           hintEl.style.display = "block";
           hintEl.textContent =
-            "extract_jsons：阶段②③写入目录；通常为「项目名」子文件夹，内含三份清单 JSON、docs_metadata、kb_local（含 manifest 与 extracted_markdown 正文）。";
+            "extract_jsons：阶段②③写入目录；通常为「项目名」子文件夹，内含三份清单 JSON、docs_metadata、kb_local（含 manifest 与 extracted_markdown 正文）。目录行右侧「ZIP」可打包下载该文件夹（不含整个 extract_jsons 根目录）。";
         } else {
           hintEl.style.display = "none";
           hintEl.textContent = "";
@@ -1562,6 +1628,7 @@
         ul.innerHTML = '<li style="color:var(--err)">' + (data.detail || res.statusText) + "</li>";
         return;
       }
+      const atRepoRoot = data.parent == null;
       if (data.parent != null && data.parent !== "") {
         const li = document.createElement("li");
         const a = document.createElement("a");
@@ -1586,7 +1653,11 @@
           spanDir.className = "mini";
           spanDir.textContent = it.relative;
           li.appendChild(spanDir);
-          appendBrowseDelete(li, it.relative, it.name);
+          const actD = document.createElement("span");
+          actD.className = "browse-actions";
+          if (browseRowEligibleExtractJsonsZip(it)) appendBrowseZip(actD, it.relative, it.name);
+          if (!atRepoRoot) appendBrowseDelete(actD, it.relative, it.name);
+          if (actD.childNodes.length) li.appendChild(actD);
         } else {
           const lower = it.name.toLowerCase();
           const isDocx = lower.endsWith(".docx");
@@ -1615,7 +1686,12 @@
           span.className = "mini";
           span.textContent = fmtSize(it.size_bytes) + " · " + it.relative;
           li.appendChild(span);
-          appendBrowseDelete(li, it.relative, it.name);
+          if (!atRepoRoot) {
+            const actF = document.createElement("span");
+            actF.className = "browse-actions";
+            appendBrowseDelete(actF, it.relative, it.name);
+            li.appendChild(actF);
+          }
         }
         ul.appendChild(li);
       });
