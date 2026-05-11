@@ -26,7 +26,7 @@ python 1_check_tobacco_kb_required_files.py
 - **`1_check_tobacco_kb_required_files.py`** — 自动验收（**`第一批`** → **`检查结果`**）
 - **`2_export_confirmation_bundle.py`** — 确认单 JSON → 多份清单 JSON，输出 **`extract_jsons/`**
 - **`3_prepare_local_kb.py`** — 基于 `extract_jsons` 生成各项目 **`kb_local/`**（`manifest.json`、`extracted_markdown/`）
-- **`generate_mock_tobacco_project.py`** — 在 **`第一批`** 下生成模拟项目
+- **`generate_mock_tobacco_project.py`** — 默认在 **`mockdata/`** 生成模拟项目（`full` 含确认单）
 - **`clean_workspace.py`** — 清理 **`检查结果`** 和/或 **`第一批`** 下项目子目录（同目录有 `clean_results.bat`、`clean_mock_projects.bat`）
 
 ## 配置
@@ -35,7 +35,8 @@ python 1_check_tobacco_kb_required_files.py
 
 ## 其他目录
 
-- **`模板示例/`** — 对外模板项目夹与 **`确认单生成器/index.html`**
-- **`tobacco_kb/mock_templates/`** — 阶段一 Mock 用 `r01.md`～`r07.md` 范例正文
+- **`mockdata/`** — Mock 脚本默认输出（可复制整夹到 **`第一批`** 再跑机检）
+- **`模板示例/`** — 模板项目夹与 **`确认单生成器/index.html`**
+- **`tobacco_kb/mock_templates/`** — 阶段一材料占位正文 `r01.md`～`r07.md`
 
 更细的说明与边界见 [常用命令示例.md](./常用命令示例.md)。

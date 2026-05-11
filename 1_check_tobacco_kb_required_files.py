@@ -59,10 +59,10 @@ PROJECT_TOP_LEVEL_DIRS: Tuple[str, ...] = (
     "02_核心资料",
 )
 SKIPPED_TOP_BUCKET_DIR = "03_安全与整改"
-# 原「标准二级目录」01_～11_ 均落在「02_核心资料」之下；配置里 mock_std_dir 仍写叶子名（如 01_项目总览）。
+# 标准叶子目录 **01_～07_** 均落在「02_核心资料」之下；配置里 mock_std_dir 仍写叶子名（如 01_项目总览）。
 CORE_MATERIALS_DIR = "02_核心资料"
 
-# **核心资料区内**标准子目录全表 **01_～11_**（共 11 项）。第一阶段「缺目录」检查各规则 mock_std_dir（叶子名）落在 CORE_MATERIALS_DIR 下。
+# **核心资料区内**允许的标准子目录全表 **01_～07_**（共 7 项）。「缺目录 / 额外目录」机检以此为准。
 STANDARD_DIRS = [
     "01_项目总览",
     "02_售前方案",
@@ -71,10 +71,6 @@ STANDARD_DIRS = [
     "05_实施上线",
     "06_验收交付",
     "07_项目复盘",
-    "08_技术设计",
-    "09_开发测试",
-    "10_运维售后",
-    "11_数据指标",
 ]
 
 _allowed_std = set(STANDARD_DIRS)
@@ -1174,7 +1170,7 @@ def write_report(results: List[Dict[str, Any]], output_path: Path) -> None:
     ws_guide["A9"] = (
         "【资料包根目录结构】须直接包含："
         + "、".join(PROJECT_TOP_LEVEL_DIRS)
-        + "。原标准目录名（01_项目总览～11_数据指标）均建在「"
+        + "。原标准目录名（01_项目总览～07_项目复盘）均建在「"
         + CORE_MATERIALS_DIR
         + "」下；缺失/额外目录列中的路径均相对项目根。"
         "「分区资料检查」工作表对应 acceptance_config.TOP_BUCKET_RULES。"

@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "document_type": "项目资料上报确认单",
+  "project": {
+    "branch_name": "测试市局",
+    "customer_name": "测试市局",
+    "project_name": "知识库验收Mock",
+    "project_year": "2026",
+    "project_status": "待验收",
+    "business_domain": "信息化",
+    "package_name": "测试市局_知识库验收Mock_2026_待验收",
+    "submit_date": "2026-05-11",
+    "is_sensitive": "否",
+    "ai_candidate_status": "否"
+  },
+  "checklist": {
+    "project_basic_info": {
+      "submitted": true,
+      "note": ""
+    },
+    "solution_plan": {
+      "submitted": true,
+      "note": ""
+    },
+    "requirement_or_function_list": {
+      "submitted": true,
+      "note": ""
+    },
+    "business_flow": {
+      "submitted": true,
+      "note": ""
+    },
+    "manual_or_training": {
+      "submitted": true,
+      "note": ""
+    },
+    "acceptance_or_delivery": {
+      "submitted": true,
+      "note": ""
+    },
+    "knowledge_summary_or_exemption": {
+      "submitted": true,
+      "note": ""
+    }
+  },
+  "security": {
+    "identified_sensitive_materials": "否",
+    "sanitized_or_marked": "是",
+    "no_cloud_attachment": "是"
+  },
+  "responsibility": {
+    "material_owner": "资料整理人(Mock)",
+    "material_owner_role": "信息中心",
+    "project_owner": "项目负责人(Mock)",
+    "project_owner_role": "项目组",
+    "branch_owner": "分公司负责人(Mock)",
+    "branch_owner_role": "管理部门",
+    "confirmation_method": "姓名确认"
+  },
+  "remark": "本确认单由 generate_mock_tobacco_project.py（scenario=full）按确认单生成器模板自动生成。",
+  "generated_at": "2026-05-11T06:10:39Z"
+}

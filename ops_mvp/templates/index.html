@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>yc-checking 运营中心</title>
+  <style>
+    :root {
+      --bg: #0a0e14;
+      --surface: #121820;
+      --card: #161d27;
+      --elev: #1c2533;
+      --text: #eef2f7;
+      --muted: #8b97a8;
+      --accent: #4d9fff;
+      --accent-hi: rgba(77, 159, 255, 0.14);
+      --ok: #3dd68c;
+      --warn: #eac54f;
+      --err: #ff6b6b;
+      --border: #2a3544;
+      --radius: 10px;
+      --font: "Segoe UI", "PingFang SC", system-ui, sans-serif;
+      --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+      --nav-w: 210px;
+      --top-h: 52px;
+    }
+    * { box-sizing: border-box; }
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    body {
+      margin: 0;
+      padding-top: var(--top-h);
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      font-size: 14px;
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* —— 顶栏 —— */
+    header.global-top {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 110;
+      height: var(--top-h);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0 1rem;
+      background: rgba(10, 14, 20, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    header.global-top h1 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+    header.global-top .badge {
+      font-size: 0.68rem;
+      color: var(--muted);
+      padding: 0.12rem 0.45rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+    header.global-top input[type="search"] {
+      flex: 1;
+      min-width: 0;
+      max-width: 320px;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.82rem;
+    }
+    header.global-top button {
+      cursor: pointer;
+      border: 1px solid var(--accent);
+      background: var(--accent-hi);
+      color: var(--accent);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    header.global-top button:hover { filter: brightness(1.1); }
+
+    /* 侧栏菜单按钮：仅小屏显示 */
+    .nav-open-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 36px;
+      padding: 0;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .nav-open-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .nav-backdrop {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: var(--top-h);
+      bottom: 0;
+      z-index: 140;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+    }
+    body.drawer-open .nav-backdrop {
+      display: block;
+    }
+
+    /* —— 布局：左侧栏贴左，主区铺满剩余宽度 —— */
+    .layout {
+      display: block;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      min-height: calc(100vh - var(--top-h));
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    @media (min-width: 921px) {
+      .layout {
+        padding-left: var(--nav-w);
+      }
+    }
+    @media (max-width: 920px) {
+      .layout {
+        padding-left: 0;
+      }
+      .nav-open-btn {
+        display: inline-flex;
+      }
+      nav.side {
+        display: block;
+        position: fixed;
+        left: 0;
+        top: var(--top-h);
+        width: min(288px, 86vw);
+        height: calc(100dvh - var(--top-h));
+        margin: 0;
+        padding: 1rem 0.75rem 2rem 1rem;
+        font-size: 0.82rem;
+        z-index: 200;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        transform: translateX(-100%);
+        transition: transform 0.22s ease;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+        pointer-events: none;
+      }
+      body.drawer-open nav.side {
+        transform: translateX(0);
+        pointer-events: auto;
+      }
+      body.drawer-open {
+        overflow: hidden;
+      }
+    }
+    @media (min-width: 921px) {
+      nav.side {
+        position: fixed;
+        top: var(--top-h);
+        left: 0;
+        width: var(--nav-w);
+        height: calc(100vh - var(--top-h));
+        max-height: calc(100vh - var(--top-h));
+        padding: 1rem 0.75rem 2rem 1rem;
+        border-right: 1px solid var(--border);
+        background: var(--surface);
+        overflow-y: auto;
+        overflow-x: hidden;
+        font-size: 0.82rem;
+        z-index: 90;
+        box-sizing: border-box;
+      }
+    }
+    nav.side .nav-h {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 1rem 0 0.35rem;
+    }
+    nav.side .nav-h:first-child { margin-top: 0; }
+
+    .zone {
+      margin-bottom: 2.25rem;
+    }
+    .zone-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 1rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+    }
+    nav.side a {
+      display: block;
+      padding: 0.28rem 0.5rem;
+      border-radius: 4px;
+      color: var(--muted);
+    }
+    nav.side a:hover { background: var(--elev); color: var(--text); text-decoration: none; }
+
+    main.main {
+      padding: 1rem 1.25rem 3rem;
+      padding-bottom: calc(3rem + min(38vh, 340px));
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    section.block {
+      scroll-margin-top: calc(var(--top-h) + 8px);
+      margin-bottom: 2rem;
+    }
+    section.block > h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 0 0 0.85rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    section.block > h2 span.hint {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.85rem;
+    }
+
+    /* —— 卡片网格 —— */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.65rem;
+    }
+    .kcard {
+      background: var(--elev);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .kcard:hover { border-color: var(--accent); }
+    .kcard .t { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; }
+    .kcard .t code { font-size: 0.78rem; color: var(--accent); font-family: var(--mono); }
+    .kcard .tip { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.45rem; line-height: 1.35; }
+    .kcard .meta { font-size: 0.72rem; color: var(--muted); }
+    .kcard .meta strong.ok { color: var(--ok); }
+    .kcard .meta strong.bad { color: var(--err); }
+
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+    .stat-pill {
+      flex: 1;
+      min-width: 120px;
+      background: var(--elev);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+      text-align: center;
+    }
+    .stat-pill .n {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-pill .l { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
+
+    .playbook {
+      counter-reset: step;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .playbook li {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.65rem;
+      align-items: start;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .playbook li:last-child { border-bottom: none; }
+    .playbook .sn {
+      counter-increment: step;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-hi);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .playbook .sn::before { content: counter(step); }
+    .playbook .txt h4 { margin: 0 0 0.2rem; font-size: 0.88rem; }
+    .playbook .txt p { margin: 0; font-size: 0.78rem; color: var(--muted); }
+
+    table.data {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    table.data th, table.data td {
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.5rem;
+      text-align: left;
+    }
+    table.data th { background: var(--elev); color: var(--muted); font-weight: 500; }
+    table.data tr:hover td { background: rgba(255,255,255,0.02); }
+
+    label { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 0.2rem; }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.4rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+    .select-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .select-wrap::after {
+      content: "";
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--muted);
+      pointer-events: none;
+      transform: translateY(-50%);
+      opacity: 0.9;
+    }
+    select.ui-select {
+      width: 100%;
+      padding: 0.45rem 2.25rem 0.45rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.85rem;
+      line-height: 1.35;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    select.ui-select:hover {
+      border-color: rgba(77, 159, 255, 0.45);
+    }
+    select.ui-select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-hi);
+    }
+    select.ui-select option {
+      background: var(--card);
+      color: var(--text);
+      padding: 0.35rem;
+    }
+    .row { margin-bottom: 0.55rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.65rem; }
+    button.action {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--elev);
+      color: var(--text);
+      padding: 0.38rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    button.action.primary { background: #238636; border-color: #2ea043; color: #fff; }
+    button.action.accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button.action.ghost { background: transparent; border-style: dashed; }
+
+    pre.log {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.72rem;
+      max-height: min(380px, 48vh);
+      overflow: auto;
+      padding: 0.75rem;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-family: var(--mono);
+    }
+
+    .tag { font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 4px; margin-right: 0.25rem; }
+    .tag.ok { background: rgba(61, 214, 140, 0.15); color: var(--ok); }
+    .tag.bad { background: rgba(255, 107, 107, 0.15); color: var(--err); }
+
+    ul.browse { list-style: none; padding: 0; margin: 0; font-size: 0.8rem; max-height: 280px; overflow: auto; }
+    ul.browse li { padding: 0.28rem 0; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
+    a.dirlink { cursor: pointer; color: var(--accent); }
+    a.filelink { cursor: pointer; color: var(--text); text-decoration: underline dotted; }
+    ul.browse li button.browse-del {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-size: 0.72rem;
+      padding: 0.12rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--err);
+      cursor: pointer;
+    }
+    ul.browse li button.browse-del:hover {
+      border-color: var(--err);
+      background: rgba(255, 107, 107, 0.12);
+    }
+
+    .folder-import-row {
+      margin-bottom: 0.55rem;
+    }
+    .folder-import-field-label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    .folder-import-box {
+      position: relative;
+    }
+    .folder-import-sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .folder-import-card {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(77, 159, 255, 0.42);
+      background: linear-gradient(
+        165deg,
+        rgba(77, 159, 255, 0.1) 0%,
+        var(--elev) 55%
+      );
+      cursor: pointer;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+    .folder-import-card:hover {
+      border-color: var(--accent);
+      border-style: solid;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
+    }
+    .folder-import-card:focus-within {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .folder-import-card-icon {
+      flex-shrink: 0;
+      width: 2.35rem;
+      height: 1.85rem;
+      border-radius: 5px;
+      background: linear-gradient(160deg, var(--accent) 0%, #2563b8 100%);
+      box-shadow: 0 2px 8px rgba(77, 159, 255, 0.28);
+      position: relative;
+    }
+    .folder-import-card-icon::before {
+      content: "";
+      position: absolute;
+      left: 0.4rem;
+      top: -0.38rem;
+      width: 0.95rem;
+      height: 0.48rem;
+      background: rgba(255, 255, 255, 0.28);
+      border-radius: 4px 4px 0 0;
+    }
+    .folder-import-card-main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.22rem;
+      min-width: 0;
+    }
+    .folder-import-card-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+    .folder-import-card-desc {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .folder-import-picked {
+      margin: 0.45rem 0 0;
+      padding-left: 0.15rem;
+      font-size: 0.72rem;
+      color: var(--ok);
+      min-height: 1.25em;
+      font-family: var(--mono);
+    }
+    .folder-import-footnote {
+      margin: 0.45rem 0 0;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .tree {
+      font-size: 0.78rem;
+      font-family: var(--mono);
+      max-height: 360px;
+      overflow: auto;
+      padding: 0.5rem 0.35rem;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .tree ul { list-style: none; padding-left: 1rem; margin: 0.15rem 0; }
+    .tree > ul { padding-left: 0; }
+    .tree li { margin: 0.12rem 0; }
+    .tree .fname { cursor: pointer; color: var(--accent); }
+    .tree .fname.file { color: var(--muted); }
+
+    .jump-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.75rem; }
+    .jump-row button {
+      font-size: 0.75rem;
+      padding: 0.28rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--elev);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .jump-row button:hover { color: var(--accent); border-color: var(--accent); }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.68);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: min(940px, 100%);
+      max-height: min(88vh, 920px);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-head {
+      padding: 0.55rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .modal-head span { font-size: 0.75rem; color: var(--muted); word-break: break-all; }
+    .modal-body { padding: 0.75rem 1rem; overflow: auto; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .modal-body pre { margin: 0; font-size: 0.74rem; white-space: pre-wrap; word-break: break-word; font-family: var(--mono); }
+    .modal-body pre a { color: var(--accent); text-decoration: underline; }
+    .modal-body iframe#modal_iframe {
+      width: 100%;
+      flex: 1;
+      min-height: min(70vh, 640px);
+      border: 0;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .mono { font-family: var(--mono); font-size: 0.78rem; }
+    .mini { font-size: 0.72rem; color: var(--muted); }
+
+    /* 底部固定输出：运行时不滚动页面，在此查看日志 */
+    .run-dock {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      max-height: min(42vh, 380px);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);
+    }
+    .run-dock-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      padding: 0.42rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      background: var(--elev);
+    }
+    .run-dock-bar strong { font-size: 0.8rem; color: var(--text); }
+    .run-dock-bar button {
+      flex-shrink: 0;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      padding: 0.22rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.74rem;
+    }
+    .run-dock-bar button:hover { color: var(--accent); border-color: var(--accent); }
+    #run_meta {
+      flex-shrink: 0;
+      margin: 0;
+      padding: 0.35rem 1rem 0;
+      font-size: 0.72rem;
+      color: var(--muted);
+      word-break: break-word;
+    }
+    .run-dock .log {
+      flex: 1;
+      overflow: auto;
+      margin: 0;
+      padding: 0.5rem 1rem 0.85rem;
+      font-size: 0.74rem;
+      line-height: 1.4;
+      min-height: 5rem;
+      max-height: calc(min(42vh, 380px) - 5.5rem);
+    }
+    body.run-dock-collapsed .run-dock .log,
+    body.run-dock-collapsed .run-dock #run_meta {
+      display: none;
+    }
+    body.run-dock-collapsed .run-dock {
+      max-height: none;
+    }
+    .chain-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.65rem 1rem;
+      margin-bottom: 0.85rem;
+    }
+    .chain-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .card-script {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+      margin-bottom: 0.5rem;
+      background: var(--bg);
+    }
+    .card-script h4 { margin: 0 0 0.25rem; font-size: 0.85rem; }
+    .card-script p { margin: 0; font-size: 0.76rem; color: var(--muted); }
+    .card-script .bar { margin-top: 0.45rem; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+    .loading { color: var(--muted); font-style: italic; }
+
+    .purpose-hero {
+      background: linear-gradient(155deg, var(--elev) 0%, var(--surface) 55%, var(--bg) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      margin-bottom: 0.85rem;
+    }
+    .purpose-hero h3 { margin: 0 0 0.45rem; font-size: 1rem; font-weight: 700; }
+    .purpose-hero .lead { margin: 0 0 0.65rem; font-size: 0.84rem; color: var(--text); line-height: 1.55; }
+    .purpose-hero .sub { margin: 0; font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+    .purpose-hero .fileno {
+      margin-top: 0.65rem;
+      padding: 0.55rem 0.65rem;
+      background: var(--bg);
+      border-radius: 6px;
+      border: 1px dashed var(--border);
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .flow-scroll {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      overflow-x: auto;
+      padding: 0.35rem 0 0.65rem;
+      margin-top: 0.75rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      overscroll-behavior-x: contain;
+    }
+    .flow-scroll::-webkit-scrollbar {
+      display: none;
+      height: 0;
+    }
+    .flow-step {
+      flex: 0 0 min(232px, 88vw);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+    }
+    .flow-step .ord {
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    .flow-step .ttl { font-weight: 600; font-size: 0.84rem; margin-bottom: 0.35rem; line-height: 1.3; }
+    .flow-step .pathline {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      word-break: break-all;
+    }
+    .flow-arrow {
+      flex: 0 0 auto;
+      align-self: center;
+      color: var(--muted);
+      font-size: 1rem;
+      padding: 0 0.2rem;
+      user-select: none;
+    }
+
+    dl.op-dl { margin: 0.5rem 0 0; font-size: 0.72rem; }
+    dl.op-dl dt { color: var(--muted); margin-top: 0.35rem; font-weight: 500; }
+    dl.op-dl dd { margin: 0.15rem 0 0; padding: 0; line-height: 1.45; color: var(--text); }
+  </style>
+</head>
+<body>
+  <header class="global-top">
+    <button type="button" class="nav-open-btn" id="nav_open_btn" title="打开导航" aria-label="打开导航">☰</button>
+    <h1>yc-checking 运营中心</h1>
+    <span class="badge" title="面板分区">准备 · 查看 · 验收 · 清理</span>
+    <span class="badge">本地 · {{ repo_root }}</span>
+    <input type="search" id="global_filter" placeholder="筛选下方目录列表中的文件名…" autocomplete="off" />
+    <button type="button" id="btn_refresh_all">全部刷新</button>
+  </header>
+
+  <div class="nav-backdrop" id="nav_backdrop" aria-hidden="true"></div>
+
+  <div class="layout">
+    <nav class="side">
+      <div class="nav-h">资料准备</div>
+      <a href="#sec-mock">模拟资料包</a>
+      <a href="#sec-first-batch-import">导入第一批</a>
+
+      <div class="nav-h">查看</div>
+      <a href="#sec-overview">目录一览</a>
+      <a href="#sec-files">目录内容</a>
+
+      <div class="nav-h">验收流程</div>
+      <a href="#sec-purpose">执行步骤</a>
+      <a href="#sec-playbook">一键运行</a>
+      <a href="#sec-md">路径参数</a>
+
+      <div class="nav-h">一键清理</div>
+      <a href="#sec-clean">清理工作区</a>
+    </nav>
+
+    <main class="main">
+      <div class="zone" id="zone-prep">
+        <p class="zone-label" id="lbl-zone-prep">资料准备</p>
+
+      <section id="sec-mock" class="block">
+        <h2>模拟资料包（Mock） <span class="hint">写入仓库 mockdata/；完整场景含确认单；与导入同属准备阶段</span></h2>
+        <div class="panel">
+          <p class="mini" style="margin:0 0 0.85rem;line-height:1.55;">
+            调用仓库根目录 <code class="mono">generate_mock_tobacco_project.py</code>，在 <code class="mono">mockdata/</code> 下生成项目文件夹。完整场景会在 <code class="mono">01_管理确认</code> 下自动生成与「确认单生成器」一致的 MD/JSON。未指定「项目文件夹名」时目录名为四段式「客户单位_项目简称_四位年份_待验收」；同名已存在时会在项目简称后加数字区分。可在「查看 → 目录内容」中浏览 <code class="mono">mockdata</code>。
+          </p>
+          <div class="row">
+            <label for="mock_customer">客户单位（可选）</label>
+            <input
+              id="mock_customer"
+              type="text"
+              placeholder="默认「测试市局」；与生成文件名第一段一致"
+              autocomplete="off"
+            />
+          </div>
+          <div class="row">
+            <label for="mock_project_segment">项目简称（可选）</label>
+            <input
+              id="mock_project_segment"
+              type="text"
+              placeholder="默认「知识库验收Mock」；勿含下划线，与生成文件名第二段一致"
+              autocomplete="off"
+            />
+          </div>
+          <div class="row">
+            <label for="mock_scenario">生成类型</label>
+            <div class="select-wrap">
+              <select id="mock_scenario" class="ui-select">
+                <option value="full" selected>生成完整目录和文件</option>
+                <option value="dirs_only">完整空目录（核心资料下 01_～07_ 共 7 个标准子目录，无资料文件）</option>
+                <option value="missing_required_partial">缺失数据文件（02 下随机若干叶目录 + 随机占位材料）</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <label for="mock_project_name">项目文件夹名（可选）</label>
+            <input
+              id="mock_project_name"
+              type="text"
+              placeholder="留空则按四段式「客户单位_项目简称_四位年份_待验收」自动生成；手动填写须符合验收文件夹命名"
+              autocomplete="off"
+            />
+          </div>
+          <div class="actions">
+            <button type="button" class="action accent" id="btn_mock_generate">生成 Mock 资料包</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-first-batch-import" class="block">
+        <h2>导入项目到「第一批」 <span class="hint">前置：完成后方可进入下方「验收流程」</span></h2>
+        <div class="panel">
+          <p class="mini" style="margin:0 0 0.75rem;line-height:1.55;">
+            <strong>选择文件夹（浏览器）</strong>：导入所选目录<strong>内部</strong>的文件与子文件夹，<strong>不会</strong>在「第一批」下再建一层与所选文件夹同名的目录（多项目时会并列落在「第一批」下）。<strong>目标文件夹名</strong>可选：填写则先建「第一批/该名/」再写入内部路径（多一层归集夹）；留空则内部路径直接落在「第一批」下。<strong>重名</strong>可能导致覆盖或与已有目录混在一起，请注意。
+            <strong>本机路径</strong>：仍按<strong>整个目录</strong>复制到「第一批/&lt;文件夹名&gt;/」（适合单个项目整夹拷贝）。浏览器<strong>不上传空文件夹</strong>；须保留空目录结构时请用「本机路径」。<strong>为什么少了某个子文件夹？</strong>常见原因是该子文件夹及其下级<strong>没有任何文件</strong>（仅空夹），浏览器不会列出路径，服务端也无法凭空创建；另有<strong>单次上传总大小上限约 512MB</strong>，超限会整单失败。
+          </p>
+          <div class="row">
+            <label for="fb_import_name">目标文件夹名（可选）</label>
+            <input
+              id="fb_import_name"
+              type="text"
+              placeholder="仅浏览器导入：留空则内部项目直接进「第一批」；填写则多一层「第一批/该名/」"
+              autocomplete="off"
+            />
+          </div>
+          <div class="folder-import-row">
+            <span class="folder-import-field-label">选择文件夹</span>
+            <div class="folder-import-box">
+              <input
+                id="fb_import_dir"
+                class="folder-import-sr-only"
+                type="file"
+                webkitdirectory
+                multiple
+                title="选定后立即导入到「第一批」"
+              />
+              <label for="fb_import_dir" class="folder-import-card">
+                <span class="folder-import-card-icon" aria-hidden="true"></span>
+                <span class="folder-import-card-main">
+                  <span class="folder-import-card-title">点击选择父文件夹</span>
+                  <span class="folder-import-card-desc">导入其内部的各项目子文件夹；不含所选顶层文件夹这一层。</span>
+                </span>
+              </label>
+              <p class="folder-import-picked" id="fb_import_dir_picked" aria-live="polite"></p>
+            </div>
+          </div>
+          <p class="mini" style="margin:0.85rem 0 0.35rem;color:var(--muted);">或</p>
+          <div class="row">
+            <label for="fb_import_path">本机项目目录绝对路径</label>
+            <input
+              id="fb_import_path"
+              type="text"
+              placeholder="例如 D:\资料\某项目 或 /home/user/proj"
+              autocomplete="off"
+            />
+          </div>
+          <div class="actions">
+            <button type="button" class="action accent" id="btn_fb_import_path">从路径复制</button>
+          </div>
+          <p id="fb_import_msg" class="mini" style="margin:0.65rem 0 0;line-height:1.45;"></p>
+        </div>
+      </section>
+
+      </div>
+
+      <div class="zone" id="zone-view">
+        <p class="zone-label" id="lbl-zone-view">查看</p>
+
+      <section id="sec-overview" class="block">
+        <h2>目录一览 <span class="hint">常用目录；点卡片在下方「目录内容」列出该路径下的文件与子文件夹</span></h2>
+        <div id="overview_cards" class="grid-cards loading">加载中…</div>
+      </section>
+
+      <section id="sec-files" class="block">
+        <h2>目录内容 <span class="hint">当前路径下的子项；可预览常见文件；每行可删除文件或文件夹（不可恢复）</span></h2>
+        <div class="jump-row" id="jump_bar"></div>
+        <p class="mono mini" id="browse_path">extract_jsons</p>
+        <p id="browse_dir_hint" class="mini" style="margin:0.35rem 0 0.65rem;line-height:1.5;color:var(--muted);display:none;"></p>
+        <ul class="browse" id="browse_list"></ul>
+      </section>
+      </div>
+
+      <div class="zone" id="zone-flow">
+        <p class="zone-label" id="lbl-zone-flow">验收流程</p>
+
+      <section id="sec-purpose" class="block">
+        <h2>执行步骤 <span class="hint">三阶段：验收 → 提取三份清单 → 提取文字</span></h2>
+        <div id="purpose_mount" class="loading">加载中…</div>
+      </section>
+
+      <section id="sec-playbook" class="block">
+        <h2>一键运行 <span class="hint" id="playbook_hint">加载中…</span></h2>
+        <div class="chain-row">
+          <button type="button" class="action primary" id="btn_chain_main" title="依次执行①验收→②清单→③正文">
+            一键串跑 ①→②→③
+          </button>
+        </div>
+        <div class="panel">
+          <ol class="playbook" id="playbook_list"></ol>
+        </div>
+      </section>
+
+      <section id="sec-md" class="block">
+        <h2>路径参数 <span class="hint">扫描目录 / 检测与修复输出；与一键运行、流水线共用</span></h2>
+        <div class="panel">
+          <div class="row">
+            <label for="scan_root">扫描目录</label>
+            <input id="scan_root" type="text" value="{{ default_scan }}" autocomplete="off" />
+          </div>
+          <div class="row" id="md_row_checker_out">
+            <label for="checker_out">检测报告输出目录</label>
+            <input id="checker_out" type="text" value="{{ default_checker_out }}" autocomplete="off" />
+          </div>
+          <div class="row" id="md_row_fix_out">
+            <label for="fix_out">修复副本输出目录</label>
+            <input id="fix_out" type="text" value="{{ default_fix_out }}" autocomplete="off" />
+          </div>
+          <div class="actions">
+            <button type="button" class="action accent" id="btn_check">质量检测</button>
+            <button type="button" class="action primary" id="btn_fix">修复（写副本）</button>
+            <button type="button" class="action ghost" id="btn_fix_dry">修复 dry-run</button>
+          </div>
+        </div>
+      </section>
+
+      </div>
+
+      <div class="zone" id="zone-clean">
+        <p class="zone-label" id="lbl-zone-clean">一键清理</p>
+
+      <section id="sec-clean" class="block">
+        <h2>清理工作区 <span class="hint">检查结果 · extract_jsons</span></h2>
+        <div class="panel">
+          <p class="mini" style="margin:0 0 0.85rem;line-height:1.55;">
+            清空「<strong>检查结果</strong>」与「<strong>extract_jsons</strong>」目录<strong>内的全部内容</strong>（两个文件夹本身保留）。调用 <code class="mono">clean_workspace.py --results --extract-jsons</code>；请先<strong>预览</strong>再执行。
+          </p>
+          <div class="actions">
+            <button type="button" class="action accent" id="btn_clean_preview">预览清理（dry-run）</button>
+            <button type="button" class="action primary" id="btn_clean_execute" style="border-color:var(--err);color:var(--err);background:rgba(255,107,107,0.12);">执行清理（危险）</button>
+          </div>
+        </div>
+      </section>
+      </div>
+
+    </main>
+  </div>
+
+  <aside id="sec-log" class="run-dock" aria-label="运行输出">
+    <div class="run-dock-bar">
+      <span><strong>运行输出</strong> · 固定在底部，不再跳动页面</span>
+      <button type="button" id="btn_run_dock_toggle" title="展开或收起">收起</button>
+    </div>
+    <p id="run_meta"></p>
+    <pre class="log" id="out_log">单次运行或串跑结果将显示在此。</pre>
+  </aside>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span id="modal_title">预览</span>
+        <button type="button" class="action" id="modal_close">关闭</button>
+      </div>
+      <div class="modal-body">
+        <pre id="modal_body"></pre>
+        <iframe id="modal_iframe" title="HTML 页面预览" hidden></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    (function setupDrawer() {
+      const bd = $("nav_backdrop");
+      const mq = () => window.matchMedia("(max-width: 920px)").matches;
+      function closeDrawer() {
+        document.body.classList.remove("drawer-open");
+        if (bd) bd.setAttribute("aria-hidden", "true");
+      }
+      function openDrawer() {
+        document.body.classList.add("drawer-open");
+        if (bd) bd.setAttribute("aria-hidden", "false");
+      }
+      const btn = $("nav_open_btn");
+      if (btn) btn.onclick = () => openDrawer();
+      if (bd) bd.onclick = () => closeDrawer();
+      document.querySelectorAll("nav.side a").forEach((a) => {
+        a.addEventListener("click", () => {
+          if (mq()) closeDrawer();
+        });
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeDrawer();
+      });
+    })();
+
+    function body() {
+      return {
+        scan_root: $("scan_root").value.trim() || "extract_jsons",
+        checker_out: $("checker_out").value.trim() || "markdown_quality_reports",
+        fix_out: $("fix_out").value.trim() || "extract_jsons_fixed",
+      };
+    }
+
+    function fmtSize(n) {
+      if (n == null) return "—";
+      if (n < 1024) return n + " B";
+      if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+      return (n / 1024 / 1024).toFixed(2) + " MB";
+    }
+
+    async function applyUiFlags() {
+      const f = {
+        markdown_check: true,
+        markdown_fix: true,
+        markdown_pipeline: true,
+      };
+      try {
+        const r = await fetch("/api/info");
+        if (r.ok) {
+          const d = await r.json();
+          Object.assign(f, d.features || {});
+        }
+      } catch (e) {}
+      window.__uiFeatures = f;
+
+      const pipe = f.markdown_pipeline;
+      const secMd = $("sec-md");
+      const navMd = document.querySelector('nav.side a[href="#sec-md"]');
+      if (!pipe) {
+        if (secMd) secMd.style.display = "none";
+        if (navMd) navMd.style.display = "none";
+      } else {
+        if (secMd) secMd.style.display = "";
+        if (navMd) navMd.style.display = "";
+      }
+
+      const rowCk = $("md_row_checker_out");
+      const rowFx = $("md_row_fix_out");
+      if (rowCk) rowCk.style.display = f.markdown_check ? "" : "none";
+      if (rowFx) rowFx.style.display = f.markdown_fix ? "" : "none";
+
+      if ($("btn_check")) $("btn_check").style.display = f.markdown_check ? "" : "none";
+      if ($("btn_fix")) $("btn_fix").style.display = f.markdown_fix ? "" : "none";
+      if ($("btn_fix_dry")) $("btn_fix_dry").style.display = f.markdown_fix ? "" : "none";
+    }
+
+    function closePreviewModal() {
+      $("modal").classList.remove("open");
+      const iframe = $("modal_iframe");
+      if (iframe) iframe.src = "";
+      const pre = $("modal_body");
+      if (pre) pre.replaceChildren();
+    }
+
+    async function openPreview(rel) {
+      const lower = rel.toLowerCase();
+      const isPdf = lower.endsWith(".pdf");
+      const isHtml = lower.endsWith(".html") || lower.endsWith(".htm");
+      const isDocx = lower.endsWith(".docx");
+      const isDoc = lower.endsWith(".doc") && !isDocx;
+      const pre = $("modal_body");
+      const iframe = $("modal_iframe");
+      $("modal_title").textContent = rel;
+      $("modal").classList.add("open");
+
+      if (isPdf) {
+        pre.hidden = true;
+        iframe.hidden = false;
+        iframe.src = "/api/reports/pdf?relative=" + encodeURIComponent(rel);
+        return;
+      }
+
+      if (isHtml) {
+        pre.hidden = true;
+        iframe.hidden = false;
+        iframe.src = "/api/reports/html?relative=" + encodeURIComponent(rel);
+        return;
+      }
+
+      iframe.hidden = true;
+      iframe.src = "";
+      pre.hidden = false;
+
+      if (isDocx || isDoc) {
+        pre.replaceChildren(document.createTextNode("加载中…"));
+        const res = await fetch(
+          "/api/reports/word-preview?relative=" + encodeURIComponent(rel)
+        );
+        const data = await res.json().catch(() => ({}));
+        pre.replaceChildren();
+        if (!res.ok) {
+          pre.textContent =
+            (data && data.detail) || res.statusText || "加载失败";
+          return;
+        }
+        if (data.ok && data.text != null) {
+          pre.textContent = data.text;
+          return;
+        }
+        const msg = document.createTextNode(
+          (data && data.message) || "无法预览该文档"
+        );
+        pre.appendChild(msg);
+        if (data && data.download_url) {
+          pre.appendChild(document.createElement("br"));
+          const a = document.createElement("a");
+          a.href = data.download_url;
+          a.textContent = "下载该文件";
+          a.rel = "noopener";
+          pre.appendChild(a);
+        }
+        return;
+      }
+
+      const res = await fetch("/api/reports/content?relative=" + encodeURIComponent(rel));
+      const ct = res.headers.get("content-type") || "";
+      let text = "";
+      if (ct.includes("application/json")) {
+        text = JSON.stringify(await res.json(), null, 2);
+      } else {
+        text = await res.text();
+      }
+      pre.textContent = text;
+    }
+
+    $("modal_close").onclick = () => closePreviewModal();
+    $("modal").onclick = (e) => {
+      if (e.target.id === "modal") closePreviewModal();
+    };
+
+    function setRunDockCollapsed(collapsed) {
+      if (collapsed) {
+        document.body.classList.add("run-dock-collapsed");
+      } else {
+        document.body.classList.remove("run-dock-collapsed");
+      }
+      const b = $("btn_run_dock_toggle");
+      if (b) b.textContent = collapsed ? "展开" : "收起";
+    }
+
+    function logToPanel(data, httpOk) {
+      setRunDockCollapsed(false);
+      const meta = $("run_meta");
+      const log = $("out_log");
+      if (!httpOk) {
+        meta.innerHTML = '<span class="tag bad">请求失败</span>';
+        const detail = data && data.detail != null ? data.detail : data;
+        log.textContent =
+          typeof detail === "string"
+            ? detail
+            : JSON.stringify(detail || {}, null, 2);
+        return;
+      }
+      if (data.steps && Array.isArray(data.steps)) {
+        const blocks = [];
+        let ran = 0;
+        let skipped = 0;
+        data.steps.forEach((s) => {
+          if (s.skipped) {
+            skipped++;
+            blocks.push(
+              "=== " + s.script_id + " [跳过] " + (s.skip_reason || "") + " ===\n"
+            );
+            return;
+          }
+          ran++;
+          blocks.push(
+            "=== " +
+              s.script_id +
+              " · exit " +
+              s.exit_code +
+              " · " +
+              (s.duration_ms != null ? s.duration_ms : 0) +
+              " ms ===\n"
+          );
+          if (s.stderr) blocks.push("--- stderr ---\n" + s.stderr + "\n");
+          blocks.push("--- stdout ---\n" + (s.stdout || "") + "\n");
+        });
+        meta.innerHTML =
+          '<span class="tag ' +
+          (data.ok ? "ok" : "bad") +
+          '">' +
+          (data.ok ? "串跑完成" : "串跑中止") +
+          "</span> · 执行 " +
+          ran +
+          " 步" +
+          (skipped ? " · 跳过 " + skipped : "") +
+          (data.stopped_at
+            ? ' · 止于 <span class="mono">' + data.stopped_at + "</span>"
+            : "");
+        log.textContent = blocks.join("\n");
+        return;
+      }
+      meta.innerHTML =
+        '<span class="tag ' + (data.ok ? "ok" : "bad") + '">exit ' + data.exit_code + "</span> · " +
+        (data.duration_ms != null ? data.duration_ms + " ms · " : "") +
+        '<span class="mono">' +
+        (data.command || []).join(" ") +
+        "</span>";
+      log.textContent =
+        (data.stderr ? "=== stderr ===\n" + data.stderr + "\n\n" : "") +
+        "=== stdout ===\n" +
+        (data.stdout || "");
+    }
+
+    async function postRun(url) {
+      $("out_log").textContent = "运行中…";
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body()),
+      });
+      const data = await res.json().catch(() => ({}));
+      logToPanel(data, res.ok);
+    }
+
+    $("btn_check").onclick = () => postRun("/api/run/check");
+    $("btn_fix").onclick = () => postRun("/api/run/fix");
+    $("btn_fix_dry").onclick = () => postRun("/api/run/fix?dry_run=true");
+
+    async function postPipeline(id) {
+      $("out_log").textContent = "运行中…";
+      const res = await fetch("/api/run/pipeline/" + encodeURIComponent(id), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body()),
+      });
+      const data = await res.json().catch(() => ({}));
+      logToPanel(data, res.ok);
+    }
+
+    async function postChainMain() {
+      $("out_log").textContent = "串跑中 ①→②→③，请稍候…";
+      const res = await fetch("/api/run/chain/main", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body()),
+      });
+      const data = await res.json().catch(() => ({}));
+      logToPanel(data, res.ok);
+    }
+
+    $("btn_chain_main").onclick = () => postChainMain();
+
+    async function postFirstBatchPath() {
+      const msg = $("fb_import_msg");
+      const src = ($("fb_import_path").value || "").trim();
+      if (!src) {
+        msg.textContent = "请填写本机项目目录的绝对路径。";
+        return;
+      }
+      const target_name = ($("fb_import_name").value || "").trim() || null;
+      msg.textContent = "复制中…";
+      const res = await fetch("/api/first-batch/import-path", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source_path: src,
+          target_name: target_name,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err =
+          typeof data.detail === "string"
+            ? data.detail
+            : data.detail != null
+              ? JSON.stringify(data.detail)
+              : res.statusText || "导入失败";
+        msg.textContent = err;
+        return;
+      }
+      msg.textContent =
+        "已写入：" +
+        (data.target || "") +
+        (data.hint ? " · " + data.hint : "") +
+        "。可在「目录内容」中浏览「第一批」。";
+      await loadOverview();
+      if (browseBase === "第一批" || browseBase.startsWith("第一批/")) {
+        await loadBrowse(browseBase);
+      }
+    }
+
+    let fbDirImportBusy = false;
+
+    async function postFirstBatchDir() {
+      const msg = $("fb_import_msg");
+      const input = $("fb_import_dir");
+      const fl = input.files;
+      if (!fl || !fl.length) {
+        return;
+      }
+      if (fbDirImportBusy) return;
+      fbDirImportBusy = true;
+      const fd = new FormData();
+      const pn = ($("fb_import_name").value || "").trim();
+      if (pn) fd.append("project_name", pn);
+      for (let i = 0; i < fl.length; i++) {
+        const f = fl[i];
+        const rel = f.webkitRelativePath || f.name;
+        fd.append("files", f, rel);
+      }
+      msg.textContent = "正在导入…";
+      try {
+        msg.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (e) {}
+      try {
+        const res = await fetch("/api/first-batch/import-directory", {
+          method: "POST",
+          body: fd,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err =
+            typeof data.detail === "string"
+              ? data.detail
+              : data.detail != null
+                ? JSON.stringify(data.detail)
+                : res.statusText || "导入失败";
+          msg.textContent = err;
+          return;
+        }
+        msg.textContent =
+          (data.hint || "已完成") +
+          " → " +
+          (data.target || "") +
+          (data.files_written != null ? " · " + data.files_written + " 个文件" : "") +
+          "。";
+        input.value = "";
+        const pickedOk = $("fb_import_dir_picked");
+        if (pickedOk) pickedOk.textContent = "";
+        await loadOverview();
+        if (browseBase === "第一批" || browseBase.startsWith("第一批/")) {
+          await loadBrowse(browseBase);
+        }
+      } catch (e) {
+        msg.textContent =
+          "导入中断：" + (e && e.message ? e.message : String(e));
+      } finally {
+        fbDirImportBusy = false;
+      }
+    }
+
+    $("fb_import_dir").addEventListener("change", () => {
+      const input = $("fb_import_dir");
+      const picked = $("fb_import_dir_picked");
+      const fl = input.files;
+      if (picked && fl && fl.length) {
+        const wr = (fl[0].webkitRelativePath || "").replace(/\\/g, "/");
+        const seg = wr.split("/")[0];
+        picked.textContent = seg
+          ? "已选择「" + seg + "」· " + fl.length + " 个文件（导入其下内容，不含本层）"
+          : "已选择 " + fl.length + " 个文件";
+      } else if (picked) {
+        picked.textContent = "";
+      }
+      postFirstBatchDir();
+    });
+
+    $("btn_fb_import_path").onclick = () => postFirstBatchPath();
+
+    async function postGenerateMock() {
+      $("out_log").textContent = "生成 Mock 资料包…";
+      setRunDockCollapsed(false);
+      const scenario = ($("mock_scenario").value || "full").trim();
+      const project_name = ($("mock_project_name").value || "").trim();
+      const customer = ($("mock_customer").value || "").trim();
+      const project = ($("mock_project_segment").value || "").trim();
+      const res = await fetch("/api/run/generate-mock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scenario,
+          project_name: project_name || null,
+          customer: customer || null,
+          project: project || null,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      logToPanel(data, res.ok);
+      if (res.ok && data && data.ok) {
+        await loadOverview();
+        if (browseBase === "第一批" || browseBase.startsWith("第一批/")) {
+          await loadBrowse(browseBase);
+        }
+      }
+    }
+    $("btn_mock_generate").onclick = () => postGenerateMock();
+
+    async function postClean(dryRun) {
+      $("out_log").textContent = dryRun ? "预览清理（dry-run）…" : "执行清理中…";
+      const res = await fetch("/api/run/clean", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dry_run: dryRun }),
+      });
+      const data = await res.json().catch(() => ({}));
+      logToPanel(data, res.ok);
+    }
+    const btnCp = $("btn_clean_preview");
+    const btnCe = $("btn_clean_execute");
+    if (btnCp) btnCp.onclick = () => postClean(true);
+    if (btnCe) {
+      btnCe.onclick = () => {
+        if (
+          !window.confirm(
+            "将清空「检查结果」与「extract_jsons」内的全部文件与子目录（根目录保留）。\n此操作不可恢复。确定执行？"
+          )
+        ) {
+          return;
+        }
+        postClean(false);
+      };
+    }
+
+    $("btn_run_dock_toggle").onclick = () => {
+      const next = !document.body.classList.contains("run-dock-collapsed");
+      setRunDockCollapsed(next);
+    };
+
+    let browseBase = "extract_jsons";
+
+    function appendBrowseDelete(li, relative, displayName) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "browse-del";
+      btn.textContent = "删除";
+      btn.title = "删除此项（不可恢复）";
+      btn.onclick = async (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const msg =
+          "确定删除「" +
+          displayName +
+          "」？\n\n相对路径：" +
+          relative +
+          "\n\n此操作不可恢复。";
+        if (!window.confirm(msg)) return;
+        const res = await fetch("/api/workspace/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ relative }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err =
+            typeof data.detail === "string"
+              ? data.detail
+              : data.detail != null
+                ? JSON.stringify(data.detail)
+                : res.statusText || "删除失败";
+          alert(err);
+          return;
+        }
+        await loadOverview();
+        await loadBrowse(browseBase);
+      };
+      li.appendChild(btn);
+    }
+
+    async function loadBrowse(rel) {
+      browseBase = rel;
+      $("browse_path").textContent = rel;
+      const hintEl = $("browse_dir_hint");
+      if (hintEl) {
+        if (rel === "extract_jsons" || rel.startsWith("extract_jsons/")) {
+          hintEl.style.display = "block";
+          hintEl.textContent =
+            "extract_jsons：阶段②③写入目录；通常为「项目名」子文件夹，内含三份清单 JSON、docs_metadata、kb_local（含 manifest 与 extracted_markdown 正文）。";
+        } else {
+          hintEl.style.display = "none";
+          hintEl.textContent = "";
+        }
+      }
+      const url = "/api/browse?relative=" + encodeURIComponent(rel);
+      const res = await fetch(url);
+      const data = await res.json().catch(() => ({}));
+      const ul = $("browse_list");
+      ul.innerHTML = "";
+      if (!res.ok) {
+        ul.innerHTML = '<li style="color:var(--err)">' + (data.detail || res.statusText) + "</li>";
+        return;
+      }
+      if (data.parent != null && data.parent !== "") {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.className = "dirlink";
+        a.textContent = "↑ 上一级";
+        a.onclick = () => loadBrowse(data.parent);
+        li.appendChild(a);
+        ul.appendChild(li);
+      }
+      const gf = ($("global_filter").value || "").trim().toLowerCase();
+      (data.items || []).forEach((it) => {
+        if (gf && !it.name.toLowerCase().includes(gf)) return;
+        const li = document.createElement("li");
+        if (it.type === "dir") {
+          const a = document.createElement("a");
+          a.className = "dirlink";
+          a.textContent = "[目录] " + it.name;
+          a.onclick = () => loadBrowse(it.relative);
+          li.appendChild(a);
+          li.appendChild(document.createTextNode(" · "));
+          const spanDir = document.createElement("span");
+          spanDir.className = "mini";
+          spanDir.textContent = it.relative;
+          li.appendChild(spanDir);
+          appendBrowseDelete(li, it.relative, it.name);
+        } else {
+          const lower = it.name.toLowerCase();
+          const isDocx = lower.endsWith(".docx");
+          const isDoc = lower.endsWith(".doc") && !isDocx;
+          const preview =
+            lower.endsWith(".json") ||
+            lower.endsWith(".md") ||
+            lower.endsWith(".txt") ||
+            lower.endsWith(".html") ||
+            lower.endsWith(".htm") ||
+            lower.endsWith(".markdown") ||
+            lower.endsWith(".pdf") ||
+            isDocx ||
+            isDoc;
+          if (preview) {
+            const a = document.createElement("a");
+            a.className = "filelink";
+            a.textContent = it.name;
+            a.onclick = () => openPreview(it.relative);
+            li.appendChild(a);
+          } else {
+            li.appendChild(document.createTextNode(it.name));
+          }
+          li.appendChild(document.createTextNode(" · "));
+          const span = document.createElement("span");
+          span.className = "mini";
+          span.textContent = fmtSize(it.size_bytes) + " · " + it.relative;
+          li.appendChild(span);
+          appendBrowseDelete(li, it.relative, it.name);
+        }
+        ul.appendChild(li);
+      });
+    }
+
+    async function loadOverview() {
+      const res = await fetch("/api/workspace/overview");
+      const d = await res.json().catch(() => ({}));
+      const host = $("overview_cards");
+      if (!res.ok) {
+        host.innerHTML = "<p>加载失败</p>";
+        return;
+      }
+      host.classList.remove("loading");
+      host.innerHTML = "";
+      (d.key_directories || []).forEach((k) => {
+        const div = document.createElement("div");
+        div.className = "kcard";
+        const ok = k.exists && (k.is_dir || k.is_file);
+        let previewHtml = "";
+        const prev = k.children_preview || [];
+        if (ok && prev.length) {
+          const names = prev
+            .slice(0, 8)
+            .map((x) => x.name)
+            .join(" · ");
+          previewHtml =
+            '<div class="mini" style="margin-top:0.4rem;line-height:1.35;color:var(--muted);font-size:0.72rem;">含：' +
+            names +
+            (k.children_truncated ? " …" : "") +
+            "</div>";
+        }
+        div.innerHTML =
+          '<div class="t"><code>' +
+          k.relative +
+          "</code></div>" +
+          '<div class="tip">' +
+          (k.tip || "") +
+          "</div>" +
+          previewHtml +
+          '<div class="meta">' +
+          (ok
+            ? '<strong class="ok">可用</strong> · '
+            : '<strong class="bad">不存在</strong> · ') +
+          (k.child_count != null ? k.child_count + " 项" : "") +
+          "</div>";
+        div.onclick = () => {
+          if (k.exists && k.is_dir) {
+            browseBase = k.relative;
+            loadBrowse(k.relative);
+          }
+        };
+        host.appendChild(div);
+      });
+    }
+
+    async function loadGuide() {
+      const mount = $("purpose_mount");
+      let res = await fetch("/api/guide");
+      if (!res.ok) {
+        res = await fetch("/api/help/guide");
+      }
+      if (!res.ok) {
+        res = await fetch("/api/guide/");
+      }
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        mount.textContent = "无法加载项目说明。";
+        mount.classList.remove("loading");
+        return;
+      }
+      mount.classList.remove("loading");
+      mount.innerHTML = "";
+
+      const hero = document.createElement("div");
+      hero.className = "purpose-hero";
+      let heroParts =
+        "<h3>" +
+        (d.title || "") +
+        "</h3>" +
+        (d.summary ? "<p class='lead'>" + d.summary + "</p>" : "");
+      if (d.operation_principle) {
+        heroParts += "<p class='sub'>" + d.operation_principle + "</p>";
+      }
+      if (d.filename_order_hint) {
+        heroParts +=
+          "<p class='mini' style='margin:0.55rem 0 0;line-height:1.5;color:var(--muted)'>" +
+          d.filename_order_hint +
+          "</p>";
+      }
+      hero.innerHTML = heroParts;
+      mount.appendChild(hero);
+
+      const flowTitle = document.createElement("p");
+      flowTitle.className = "mini";
+      flowTitle.style.margin = "0.75rem 0 0.35rem";
+      flowTitle.textContent =
+        "三阶段：每一步做什么、产出在哪（窄屏可横向滑动）";
+      mount.appendChild(flowTitle);
+
+      const sc = document.createElement("div");
+      sc.className = "flow-scroll";
+      const steps = d.data_flow_steps || [];
+      steps.forEach((st, i) => {
+        const box = document.createElement("div");
+        box.className = "flow-step";
+        box.innerHTML =
+          "<div class='ord'>步骤 " +
+          st.order +
+          "</div>" +
+          "<div class='ttl'>" +
+          st.title +
+          "</div>" +
+          (st.path_hint
+            ? "<div class='pathline'>" + st.path_hint + "</div>"
+            : "") +
+          "<p class='sub' style='margin:0'>" +
+          (st.caption || "") +
+          "</p>" +
+          (st.note
+            ? "<p class='sub' style='margin:0.45rem 0 0;color:var(--warn)'>" +
+              st.note +
+              "</p>"
+            : "");
+        sc.appendChild(box);
+        if (i < steps.length - 1) {
+          const ar = document.createElement("span");
+          ar.className = "flow-arrow";
+          ar.textContent = "→";
+          sc.appendChild(ar);
+        }
+      });
+      mount.appendChild(sc);
+    }
+
+    async function loadPlaybook() {
+      const res = await fetch("/api/help/playbook");
+      const d = await res.json().catch(() => ({}));
+      const steps = d.steps || [];
+      const hint = $("playbook_hint");
+      if (hint) {
+        hint.textContent =
+          "三阶段①②③；一键串跑即①→②→③；输出在底部";
+      }
+      const ol = $("playbook_list");
+      ol.innerHTML = "";
+      steps.forEach((s) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.className = "action accent";
+        btn.type = "button";
+        btn.textContent = "运行";
+        btn.onclick = () => postPipeline(s.script_id);
+        const mid = document.createElement("div");
+        mid.className = "txt";
+        mid.innerHTML =
+          "<h4><span style='display:inline-block;margin-right:0.35rem;padding:0.1rem 0.45rem;border-radius:4px;background:rgba(77,159,255,0.18);color:var(--accent);font-size:0.78rem;font-weight:700'>" +
+          (s.badge || "") +
+          "</span>" +
+          (s.title || "") +
+          "</h4><p>" +
+          (s.detail || "") +
+          "</p>";
+        const sn = document.createElement("div");
+        sn.className = "sn";
+        li.appendChild(sn);
+        li.appendChild(mid);
+        li.appendChild(btn);
+        ol.appendChild(li);
+      });
+    }
+
+    function buildJumpBar() {
+      const uf = window.__uiFeatures || { markdown_check: true, markdown_fix: true };
+      const keys = [
+        ["extract_jsons", "extract_jsons"],
+        ["第一批", "第一批"],
+        ["检查结果", "检查结果"],
+      ];
+      if (uf.markdown_check) keys.push(["质量报告", "markdown_quality_reports"]);
+      if (uf.markdown_fix) keys.push(["修复副本", "extract_jsons_fixed"]);
+      const bar = $("jump_bar");
+      bar.innerHTML = "";
+      keys.forEach(([label, path]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = label;
+        b.onclick = () => loadBrowse(path);
+        bar.appendChild(b);
+      });
+    }
+
+    let filterTimer = null;
+    $("global_filter").addEventListener("input", () => {
+      clearTimeout(filterTimer);
+      filterTimer = setTimeout(() => {
+        loadBrowse(browseBase);
+      }, 280);
+    });
+
+    $("btn_refresh_all").onclick = async () => {
+      await applyUiFlags();
+      buildJumpBar();
+      await loadGuide();
+      await loadOverview();
+      await loadPlaybook();
+      await loadBrowse(browseBase);
+    };
+
+    (async function boot() {
+      await applyUiFlags();
+      buildJumpBar();
+      loadBrowse(browseBase);
+      await loadGuide();
+      await loadOverview();
+      await loadPlaybook();
+    })();
+
+    $("scan_root").addEventListener("change", () => loadBrowse($("scan_root").value.trim() || "extract_jsons"));
+  </script>
+</body>
+</html>

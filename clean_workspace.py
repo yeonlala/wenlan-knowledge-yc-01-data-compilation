@@ -2,17 +2,24 @@
 一键清理工作区输出：
 
   • 「检查结果」目录内的验收报告等文件（默认仅删该目录下内容，不删目录本身）
-  • 「第一批」目录下的各项目子文件夹（模拟数据通常在此，**不可逆**）
+  • 「第一批」目录下的各项目子文件夹（`--mock` / `--all` 时，**不可逆**）
+  • 「extract_jsons」目录内的清单与抽取产物（`--extract-jsons`；仅删其下内容，目录本身保留）
 
 用法（在仓库根目录 `yc-checking` 下执行）：
 
   # 仅清空检查结果
   python clean_workspace.py --results
 
+  # 仅清空 extract_jsons（清单与抽取产物）
+  python clean_workspace.py --extract-jsons
+
+  # 检查结果 + extract_jsons（运维台默认清理范围）
+  python clean_workspace.py --results --extract-jsons --dry-run
+
   # 仅删除第一批下全部项目子目录（需确认）
   python clean_workspace.py --mock --yes
 
-  # 两项一起做
+  # 检查结果 + 第一批项目目录
   python clean_workspace.py --all --yes
 
   # 先预览不真正删除
@@ -35,6 +42,7 @@ from typing import List
 
 RESULT_DIR_NAME = "检查结果"
 BATCH_DIR_NAME = "第一批"
+EXTRACT_JSONS_DIR_NAME = "extract_jsons"
 
 
 def _rm_tree(path: Path) -> None:
@@ -52,6 +60,22 @@ def clean_results_dir(base: Path, dry_run: bool) -> List[str]:
         msgs.append(f"跳过（不存在）：{rd}")
         return msgs
     for child in sorted(rd.iterdir()):
+        if dry_run:
+            msgs.append(f"[预览] 将删除：{child}")
+        else:
+            _rm_tree(child)
+            msgs.append(f"已删除：{child}")
+    return msgs
+
+
+def clean_extract_jsons_dir(base: Path, dry_run: bool) -> List[str]:
+    """删除「extract_jsons」内全部条目；目录本身保留。"""
+    ed = base / EXTRACT_JSONS_DIR_NAME
+    msgs: List[str] = []
+    if not ed.is_dir():
+        msgs.append(f"跳过（不存在）：{ed}")
+        return msgs
+    for child in sorted(ed.iterdir()):
         if dry_run:
             msgs.append(f"[预览] 将删除：{child}")
         else:
@@ -92,7 +116,7 @@ def _configure_stdio_utf8() -> None:
 def main() -> int:
     _configure_stdio_utf8()
     parser = argparse.ArgumentParser(
-        description="清理「检查结果」与/或「第一批」下的项目目录（模拟资料）。"
+        description="清理「检查结果」、「extract_jsons」与/或「第一批」下的产出目录。"
     )
     parser.add_argument(
         "--base",
@@ -116,6 +140,12 @@ def main() -> int:
         help="等价于同时指定 --results 与 --mock",
     )
     parser.add_argument(
+        "--extract-jsons",
+        dest="extract_jsons",
+        action="store_true",
+        help=f"清空「{EXTRACT_JSONS_DIR_NAME}」内的全部文件与子目录（与「检查结果」类似，根目录保留）",
+    )
+    parser.add_argument(
         "--yes",
         action="store_true",
         help="确认执行对「第一批」下项目的删除（mock 场景必填，除非使用 --dry-run）",
@@ -131,9 +161,10 @@ def main() -> int:
 
     do_results = args.results or args.all
     do_mock = args.mock or args.all
+    do_extract = bool(getattr(args, "extract_jsons", False))
 
-    if not do_results and not do_mock:
-        parser.error("请指定 --results、--mock 之一，或使用 --all")
+    if not do_results and not do_mock and not do_extract:
+        parser.error("请指定 --results、--mock、--extract-jsons 之一，或使用 --all")
 
     if do_mock and not args.dry_run and not args.yes:
         parser.error(
@@ -146,6 +177,11 @@ def main() -> int:
     if do_results:
         print(f"\n—— {RESULT_DIR_NAME} ——")
         for line in clean_results_dir(base, args.dry_run):
+            print(line)
+
+    if do_extract:
+        print(f"\n—— {EXTRACT_JSONS_DIR_NAME} ——")
+        for line in clean_extract_jsons_dir(base, args.dry_run):
             print(line)
 
     if do_mock:

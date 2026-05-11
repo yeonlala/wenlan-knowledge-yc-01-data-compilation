@@ -1,0 +1,192 @@
+{
+  "schema_version": "2.4",
+  "purpose_zh": "本地知识库沉淀准备：一个原始文件对应一个 document；extracted_markdown 为整篇 Markdown（含表格）；仅 manifest 无 tables/rows 字段",
+  "project_folder": "测试市局_知识库验收Mock_2026_待验收",
+  "generated_at": "2026-05-11T06:19:20Z",
+  "source_dir": "docs_metadata",
+  "project_fields": {
+    "branch_name": "测试市局",
+    "customer_name": "测试市局",
+    "project_name": "知识库验收Mock",
+    "project_year": "2026",
+    "project_status": "待验收",
+    "business_domain": "信息化",
+    "package_name": "测试市局_知识库验收Mock_2026_待验收",
+    "submit_date": "2026-05-11",
+    "is_sensitive": "否",
+    "ai_candidate_status": "否"
+  },
+  "output_dirs": {
+    "markdown": "extracted_markdown"
+  },
+  "total_documents": 7,
+  "summary": {
+    "documents_ok": 7,
+    "documents_empty": 0,
+    "documents_failed": 0,
+    "documents_skipped": 0
+  },
+  "documents": [
+    {
+      "doc_id": "8add08383ce89f76",
+      "document_index": 1,
+      "source_file": "01_项目总览__项目基本信息表_20260101_内部.docx",
+      "source_path": "E:\\py-project\\sinaaaa\\yc-checking\\extract_jsons\\测试市局_知识库验收Mock_2026_待验收\\docs_metadata\\01_项目总览__项目基本信息表_20260101_内部.docx",
+      "standard_subdir": "01_项目总览",
+      "leaf_inner_path_posix": "项目基本信息表_20260101_内部.docx",
+      "rule_id": "r01",
+      "rule_label_zh": "1.项目基本信息表",
+      "extension": ".docx",
+      "size_bytes": 38002,
+      "sha256": "e001debe6fbefe73f8b34b6adff07023f89a14ae960f4d5f63b306794729e3c1",
+      "risk_keywords_hit": [],
+      "views": {
+        "markdown": "extracted_markdown/8add08383ce89f76.md"
+      },
+      "quality": {
+        "status": "ok",
+        "has_text": true,
+        "text_chars": 558,
+        "warnings": []
+      }
+    },
+    {
+      "doc_id": "4bfafff9ed51e7a7",
+      "document_index": 2,
+      "source_file": "02_售前方案__建设方案_20260101_内部.docx",
+      "source_path": "E:\\py-project\\sinaaaa\\yc-checking\\extract_jsons\\测试市局_知识库验收Mock_2026_待验收\\docs_metadata\\02_售前方案__建设方案_20260101_内部.docx",
+      "standard_subdir": "02_售前方案",
+      "leaf_inner_path_posix": "建设方案_20260101_内部.docx",
+      "rule_id": "r02",
+      "rule_label_zh": "2.建设方案/投标方案/汇报方案（三选一）",
+      "extension": ".docx",
+      "size_bytes": 39176,
+      "sha256": "e391979640203cc5fb31b347578db394496af9189474cb3b4e23f047782e0f9b",
+      "risk_keywords_hit": [],
+      "views": {
+        "markdown": "extracted_markdown/4bfafff9ed51e7a7.md"
+      },
+      "quality": {
+        "status": "ok",
+        "has_text": true,
+        "text_chars": 1232,
+        "warnings": []
+      }
+    },
+    {
+      "doc_id": "809070f23c997075",
+      "document_index": 3,
+      "source_file": "03_业务需求__需求规格说明书_20260101_内部.docx",
+      "source_path": "E:\\py-project\\sinaaaa\\yc-checking\\extract_jsons\\测试市局_知识库验收Mock_2026_待验收\\docs_metadata\\03_业务需求__需求规格说明书_20260101_内部.docx",
+      "standard_subdir": "03_业务需求",
+      "leaf_inner_path_posix": "需求规格说明书_20260101_内部.docx",
+      "rule_id": "r03",
+      "rule_label_zh": "3.需求规格说明书/功能清单（二选一）",
+      "extension": ".docx",
+      "size_bytes": 39006,
+      "sha256": "ef9b6dff918b087dccb56ce3581f9325c5f61ed0fff37f37af9837dd00009361",
+      "risk_keywords_hit": [],
+      "views": {
+        "markdown": "extracted_markdown/809070f23c997075.md"
+      },
+      "quality": {
+        "status": "ok",
+        "has_text": true,
+        "text_chars": 1168,
+        "warnings": []
+      }
+    },
+    {
+      "doc_id": "d84d1a3825c0e69a",
+      "document_index": 4,
+      "source_file": "04_产品设计__业务流程图_20260101_内部.docx",
+      "source_path": "E:\\py-project\\sinaaaa\\yc-checking\\extract_jsons\\测试市局_知识库验收Mock_2026_待验收\\docs_metadata\\04_产品设计__业务流程图_20260101_内部.docx",
+      "standard_subdir": "04_产品设计",
+      "leaf_inner_path_posix": "业务流程图_20260101_内部.docx",
+      "rule_id": "r04",
+      "rule_label_zh": "4.业务流程图",
+      "extension": ".docx",
+      "size_bytes": 38678,
+      "sha256": "e60029557d673723c5589f27650882d1e979113e101f0642fe5bae60d85c26da",
+      "risk_keywords_hit": [],
+      "views": {
+        "markdown": "extracted_markdown/d84d1a3825c0e69a.md"
+      },
+      "quality": {
+        "status": "ok",
+        "has_text": true,
+        "text_chars": 919,
+        "warnings": []
+      }
+    },
+    {
+      "doc_id": "b957884c33c6fe1e",
+      "document_index": 5,
+      "source_file": "05_实施上线__培训资料_20260101_内部.docx",
+      "source_path": "E:\\py-project\\sinaaaa\\yc-checking\\extract_jsons\\测试市局_知识库验收Mock_2026_待验收\\docs_metadata\\05_实施上线__培训资料_20260101_内部.docx",
+      "standard_subdir": "05_实施上线",
+      "leaf_inner_path_posix": "培训资料_20260101_内部.docx",
+      "rule_id": "r05",
+      "rule_label_zh": "5.用户手册/操作手册/培训资料（三选一）",
+      "extension": ".docx",
+      "size_bytes": 38926,
+      "sha256": "d7c5da3e23dccbf966f4bf527ddcebf9134fbfd31ade2a904f6adad4eb58c725",
+      "risk_keywords_hit": [],
+      "views": {
+        "markdown": "extracted_markdown/b957884c33c6fe1e.md"
+      },
+      "quality": {
+        "status": "ok",
+        "has_text": true,
+        "text_chars": 1108,
+        "warnings": []
+      }
+    },
+    {
+      "doc_id": "d8303645a94988e5",
+      "document_index": 6,
+      "source_file": "06_验收交付__验收报告_20260101_内部.docx",
+      "source_path": "E:\\py-project\\sinaaaa\\yc-checking\\extract_jsons\\测试市局_知识库验收Mock_2026_待验收\\docs_metadata\\06_验收交付__验收报告_20260101_内部.docx",
+      "standard_subdir": "06_验收交付",
+      "leaf_inner_path_posix": "验收报告_20260101_内部.docx",
+      "rule_id": "r06",
+      "rule_label_zh": "6.验收报告/最终交付清单（二选一）",
+      "extension": ".docx",
+      "size_bytes": 38846,
+      "sha256": "9a750eccf32e29bc2cdac1b25d6e1adac50f1aa75d9c4fe9eb6b3551102723c7",
+      "risk_keywords_hit": [],
+      "views": {
+        "markdown": "extracted_markdown/d8303645a94988e5.md"
+      },
+      "quality": {
+        "status": "ok",
+        "has_text": true,
+        "text_chars": 1145,
+        "warnings": []
+      }
+    },
+    {
+      "doc_id": "dd1d7cdef6d54e19",
+      "document_index": 7,
+      "source_file": "07_项目复盘__项目知识沉淀表_20260101_内部.docx",
+      "source_path": "E:\\py-project\\sinaaaa\\yc-checking\\extract_jsons\\测试市局_知识库验收Mock_2026_待验收\\docs_metadata\\07_项目复盘__项目知识沉淀表_20260101_内部.docx",
+      "standard_subdir": "07_项目复盘",
+      "leaf_inner_path_posix": "项目知识沉淀表_20260101_内部.docx",
+      "rule_id": "r07",
+      "rule_label_zh": "7.项目知识沉淀表/项目复盘表（二选一）",
+      "extension": ".docx",
+      "size_bytes": 38964,
+      "sha256": "ca73299b1ee63f77bf09cc98c29bc116b0de7a5a1f3760f8cc6795af212bd11d",
+      "risk_keywords_hit": [],
+      "views": {
+        "markdown": "extracted_markdown/dd1d7cdef6d54e19.md"
+      },
+      "quality": {
+        "status": "ok",
+        "has_text": true,
+        "text_chars": 1068,
+        "warnings": []
+      }
+    }
+  ]
+}

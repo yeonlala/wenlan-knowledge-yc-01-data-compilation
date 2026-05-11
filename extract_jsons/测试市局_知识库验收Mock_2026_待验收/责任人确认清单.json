@@ -1,0 +1,29 @@
+{
+  "list_type": "responsibility",
+  "schema_version": "1.0",
+  "fields": {
+    "material_owner": "资料整理人(Mock)",
+    "material_owner_role": "信息中心",
+    "project_owner": "项目负责人(Mock)",
+    "project_owner_role": "项目组",
+    "branch_owner": "分公司负责人(Mock)",
+    "branch_owner_role": "管理部门",
+    "confirmation_method": "姓名确认"
+  },
+  "remarks": {
+    "title_zh": "责任人确认清单",
+    "column_labels_zh": {
+      "material_owner": "资料整理责任人",
+      "material_owner_role": "资料整理人角色",
+      "project_owner": "项目负责人",
+      "project_owner_role": "项目负责人角色",
+      "branch_owner": "分公司/部门负责人",
+      "branch_owner_role": "分公司负责人角色",
+      "confirmation_method": "确认方式"
+    }
+  },
+  "meta": {
+    "source_file": "第一批\\测试市局_知识库验收Mock_2026_待验收\\01_管理确认\\项目资料上报确认单_20260511.json",
+    "extracted_at": "2026-05-11T06:19:19Z"
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "list_type": "material_submission",
+  "schema_version": "1.0",
+  "items": [
+    {
+      "item_key": "project_basic_info",
+      "category_label_zh": "项目基本信息表",
+      "submitted": true,
+      "note": ""
+    },
+    {
+      "item_key": "solution_plan",
+      "category_label_zh": "建设方案/总体设计与技术架构",
+      "submitted": true,
+      "note": ""
+    },
+    {
+      "item_key": "requirement_or_function_list",
+      "category_label_zh": "需求规格说明书或功能清单",
+      "submitted": true,
+      "note": ""
+    },
+    {
+      "item_key": "business_flow",
+      "category_label_zh": "业务流程与流程图",
+      "submitted": true,
+      "note": ""
+    },
+    {
+      "item_key": "manual_or_training",
+      "category_label_zh": "用户手册、培训资料或操作指南",
+      "submitted": true,
+      "note": ""
+    },
+    {
+      "item_key": "acceptance_or_delivery",
+      "category_label_zh": "验收报告或最终交付清单",
+      "submitted": true,
+      "note": ""
+    },
+    {
+      "item_key": "knowledge_summary_or_exemption",
+      "category_label_zh": "知识沉淀总结或免入库说明",
+      "submitted": true,
+      "note": ""
+    }
+  ],
+  "core_phase1_inventory": {
+    "resolved_project_root": "第一批/测试市局_知识库验收Mock_2026_待验收",
+    "core_materials_dir": "02_核心资料",
+    "core_materials_exists": true,
+    "total_document_count": 7,
+    "hint": "",
+    "inventory_note_zh": "列出各叶目录下全部文件（扩展名不限）；与 extract 目录 docs_metadata 扁平归集一致；排除 __pycache__、以「.」开头的隐藏文件及 Thumbs.db 等。",
+    "phase1_directories": [
+      {
+        "rule_id": "r01",
+        "rule_label_zh": "1.项目基本信息表",
+        "standard_subdir": "01_项目总览",
+        "directory_exists": true,
+        "rule_optional": false,
+        "document_count": 1,
+        "documents": [
+          {
+            "filename": "项目基本信息表_20260101_内部.docx",
+            "file_extension": ".docx",
+            "flattened_bundle_filename": "01_项目总览__项目基本信息表_20260101_内部.docx",
+            "source_relative_path": "02_核心资料/01_项目总览/项目基本信息表_20260101_内部.docx"
+          }
+        ]
+      },
+      {
+        "rule_id": "r02",
+        "rule_label_zh": "2.建设方案/投标方案/汇报方案（三选一）",
+        "standard_subdir": "02_售前方案",
+        "directory_exists": true,
+        "rule_optional": false,
+        "document_count": 1,
+        "documents": [
+          {
+            "filename": "建设方案_20260101_内部.docx",
+            "file_extension": ".docx",
+            "flattened_bundle_filename": "02_售前方案__建设方案_20260101_内部.docx",
+            "source_relative_path": "02_核心资料/02_售前方案/建设方案_20260101_内部.docx"
+          }
+        ]
+      },
+      {
+        "rule_id": "r03",
+        "rule_label_zh": "3.需求规格说明书/功能清单（二选一）",
+        "standard_subdir": "03_业务需求",
+        "directory_exists": true,
+        "rule_optional": false,
+        "document_count": 1,
+        "documents": [
+          {
+            "filename": "需求规格说明书_20260101_内部.docx",
+            "file_extension": ".docx",
+            "flattened_bundle_filename": "03_业务需求__需求规格说明书_20260101_内部.docx",
+            "source_relative_path": "02_核心资料/03_业务需求/需求规格说明书_20260101_内部.docx"
+          }
+        ]
+      },
+      {
+        "rule_id": "r04",
+        "rule_label_zh": "4.业务流程图",
+        "standard_subdir": "04_产品设计",
+        "directory_exists": true,
+        "rule_optional": false,
+        "document_count": 1,
+        "documents": [
+          {
+            "filename": "业务流程图_20260101_内部.docx",
+            "file_extension": ".docx",
+            "flattened_bundle_filename": "04_产品设计__业务流程图_20260101_内部.docx",
+            "source_relative_path": "02_核心资料/04_产品设计/业务流程图_20260101_内部.docx"
+          }
+        ]
+      },
+      {
+        "rule_id": "r05",
+        "rule_label_zh": "5.用户手册/操作手册/培训资料（三选一）",
+        "standard_subdir": "05_实施上线",
+        "directory_exists": true,
+        "rule_optional": false,
+        "document_count": 1,
+        "documents": [
+          {
+            "filename": "培训资料_20260101_内部.docx",
+            "file_extension": ".docx",
+            "flattened_bundle_filename": "05_实施上线__培训资料_20260101_内部.docx",
+            "source_relative_path": "02_核心资料/05_实施上线/培训资料_20260101_内部.docx"
+          }
+        ]
+      },
+      {
+        "rule_id": "r06",
+        "rule_label_zh": "6.验收报告/最终交付清单（二选一）",
+        "standard_subdir": "06_验收交付",
+        "directory_exists": true,
+        "rule_optional": false,
+        "document_count": 1,
+        "documents": [
+          {
+            "filename": "验收报告_20260101_内部.docx",
+            "file_extension": ".docx",
+            "flattened_bundle_filename": "06_验收交付__验收报告_20260101_内部.docx",
+            "source_relative_path": "02_核心资料/06_验收交付/验收报告_20260101_内部.docx"
+          }
+        ]
+      },
+      {
+        "rule_id": "r07",
+        "rule_label_zh": "7.项目知识沉淀表/项目复盘表（二选一）",
+        "standard_subdir": "07_项目复盘",
+        "directory_exists": true,
+        "rule_optional": true,
+        "document_count": 1,
+        "documents": [
+          {
+            "filename": "项目知识沉淀表_20260101_内部.docx",
+            "file_extension": ".docx",
+            "flattened_bundle_filename": "07_项目复盘__项目知识沉淀表_20260101_内部.docx",
+            "source_relative_path": "02_核心资料/07_项目复盘/项目知识沉淀表_20260101_内部.docx"
+          }
+        ]
+      }
+    ]
+  },
+  "remarks": {
+    "title_zh": "材料提交清单",
+    "core_inventory_scope_zh": "对应 PHASE1_RULES：02_核心资料 下七个标准子目录内的文件列表（扩展名不限，与 docs_metadata 归集一致）"
+  },
+  "meta": {
+    "source_file": "第一批\\测试市局_知识库验收Mock_2026_待验收\\01_管理确认\\项目资料上报确认单_20260511.json",
+    "extracted_at": "2026-05-11T06:19:19Z"
+  }
+}

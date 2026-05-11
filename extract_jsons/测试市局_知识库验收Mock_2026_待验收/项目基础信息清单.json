@@ -1,0 +1,37 @@
+{
+  "list_type": "project_basic_info",
+  "schema_version": "1.0",
+  "source_document_type": "项目资料上报确认单",
+  "fields": {
+    "branch_name": "测试市局",
+    "customer_name": "测试市局",
+    "project_name": "知识库验收Mock",
+    "project_year": "2026",
+    "project_status": "待验收",
+    "business_domain": "信息化",
+    "package_name": "测试市局_知识库验收Mock_2026_待验收",
+    "submit_date": "2026-05-11",
+    "is_sensitive": "否",
+    "ai_candidate_status": "否"
+  },
+  "remarks": {
+    "title_zh": "项目基础信息清单",
+    "column_labels_zh": {
+      "branch_name": "分公司名称",
+      "customer_name": "客户单位",
+      "project_name": "项目名称",
+      "project_year": "项目年份",
+      "project_status": "项目状态",
+      "business_domain": "业务板块",
+      "package_name": "资料包名称",
+      "submit_date": "提交日期",
+      "is_sensitive": "是否涉敏",
+      "ai_candidate_status": "是否作为AI入库候选"
+    }
+  },
+  "meta": {
+    "source_file": "第一批\\测试市局_知识库验收Mock_2026_待验收\\01_管理确认\\项目资料上报确认单_20260511.json",
+    "extracted_at": "2026-05-11T06:19:19Z",
+    "generated_at": "2026-05-11T06:10:39Z"
+  }
+}
